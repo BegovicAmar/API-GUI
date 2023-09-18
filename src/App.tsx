@@ -45,6 +45,7 @@ interface Reservation{
     Number: string;
     Id: string;
     ServiceTimeUnitPeriod: string;
+    LastName: string;
 }
 interface ReservationsGroupCreateResponseType {
     Reservations: Array<Reservation>
@@ -58,14 +59,14 @@ const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupC
     ) {
         return reservationsGroupCreateResponse.Reservations.map((reservation) => (
             <div key={reservation.Id}>
+                <p>LastName: {reservation.LastName}</p>
                 <p>ReservationNumber: {reservation.Number}</p>
                 <p>ReservationId: {reservation.Id}</p>
                 <p>StartUtc: {reservation.StartUtc}</p>
                 <p>EndUtc: {reservation.EndUtc}</p>
             </div>
         )
-    );
-    }
+    );}
     return null;
 }
 
@@ -80,11 +81,23 @@ const getEndDateFromStartDate = (getTodaysDate: string | number | Date) => {
     return date.toISOString().split("T")[0];
 };
 
+const generateRandomLastName = () => {
+    const lastNames = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor'];
+    return lastNames[Math.floor(Math.random() * lastNames.length)];
+};
+
+const generateRandomEmail = (lastName: string) => {
+    const domains = ['gmail.com', 'yahoo.com', 'outlook.com'];
+    const domain = domains[Math.floor(Math.random() * domains.length)];
+    return `${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@${domain}`;
+};
+
 function App() {
+    const randomLastName = generateRandomLastName();
     const [reservationDetails, setReservationDetails] = useState(null);
     const [inputData, setInputData] = useState({
-        email: samplePayload.Customer.Email,
-        lastName: samplePayload.Customer.LastName,
+        email: generateRandomEmail(randomLastName),
+        lastName: randomLastName,
         startUtc: getTodaysDate(),
         endUtc: getEndDateFromStartDate(getTodaysDate())
     });
@@ -116,8 +129,9 @@ function App() {
             const newPayload = {...samplePayload, Reservations: updatedReservations, Customer: {...samplePayload.Customer, Email: inputData.email, LastName: inputData.lastName}};
             const reposnseMeta = await fetch("https://gx.mews-develop.com/api/bookingEngine/v1/reservationGroups/create",{ method:"POST", body: JSON.stringify(newPayload)}, )
             const responseJson = await reposnseMeta.json();
-            console.log(responseJson)
-            setReservationDetails(responseJson);
+            const enhancedResponse = {...responseJson,Reservations: responseJson.Reservations.map((reservation: any) => ({...reservation,LastName: inputData.lastName}))};
+            console.log(enhancedResponse);
+        setReservationDetails(enhancedResponse);
         } catch (err) {
             console.error(err, 'CATCH')
         }
