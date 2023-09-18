@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  position: absolute;
 }
 
 .App-logo {
@@ -11,6 +12,21 @@
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
+}
+
+.App {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+}
+
+.dark-mode {
+  background-color: #121212;
+  color: white;
 }
 
 .App-header {
@@ -28,6 +44,24 @@
   color: #61dafb;
 }
 
+.center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.center-content label {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 200px; /* Width of the widest input box */
+  margin: 0.5rem 0; /* Some vertical spacing */
+}
+
+.center-content input {
+  width: 100%;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);
@@ -35,4 +69,53 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+.loader-container {
+  position: fixed;       /* Fixed positioning */
+  top: 0;
+  left: 0;
+  width: 100%;           /* Span the full viewport */
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);  /* Semi-transparent black background */
+  display: flex;
+  justify-content: center; /* Center the loader horizontally */
+  align-items: center;     /* Center the loader vertically */
+  z-index: 1000;           /* High z-index to make it on top of everything */
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: App-logo-spin 1s linear infinite;
+}
+
+.dark-mode-toggle-button {
+  background-color: #333;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dark-mode-toggle-button:hover {
+  background-color: #555;
+}
+
+.dark-mode .dark-mode-toggle-button {
+  background-color: #ddd;
+  color: #333;
+}
+
+.dark-mode .dark-mode-toggle-button:hover {
+  background-color: #bbb;
+}
+
+.uniform-width {
+  width: 200px;
 }

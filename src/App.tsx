@@ -93,6 +93,7 @@ const generateRandomEmail = (lastName: string) => {
 };
 
 function App() {
+    const [darkMode, setDarkMode] = useState(false);
     const randomLastName = generateRandomLastName();
     const [reservationDetails, setReservationDetails] = useState(null);
     const [inputData, setInputData] = useState({
@@ -101,6 +102,7 @@ function App() {
         startUtc: getTodaysDate(),
         endUtc: getEndDateFromStartDate(getTodaysDate())
     });
+    const [loading, setLoading] = useState(false);
 
     //@ts-ignore
     const handleInputOnChange = (name, event) => {
@@ -123,6 +125,7 @@ function App() {
         }
     }
     const createReservation = async ()=> {
+        setLoading(true);
         try {
             const updatedReservations = samplePayload.Reservations.map(reservation => {
                 return {...reservation, StartUtc: `${inputData.startUtc}T22:00:00.000Z`, EndUtc: `${inputData.endUtc}T22:00:00.000Z`};});
@@ -135,40 +138,61 @@ function App() {
         } catch (err) {
             console.error(err, 'CATCH')
         }
+        setLoading(false);
     }
 <br/>
-  return (
-    <div className="App">
-      {/*<header className="App-header">*/}
-      {/*    */}
-      {/*</header>*/}
-        <div>
+return (
+    <div className={`App ${darkMode ? "dark-mode" : ""}`}>
+        <div className="center-content">
+        {loading && (
+            <div className="loader-container">
+                <div className="loader"></div>
+            </div>
+        )}
+            {/* Dark Mode Toggle Button */}
+            <button 
+                className="dark-mode-toggle-button uniform-width"
+                onClick={() => {
+                    console.log("Before toggle:", darkMode);
+                    setDarkMode(!darkMode);
+                    console.log("After toggle:", darkMode);
+                }}
+            >
+                {darkMode ? "Light Mode" : "Dark Mode"}
+            </button>
+             </div>
+        <div className="center-content">
+        {loading && (
+    <div className="loader-container">
+        <div className="loader"></div>
+    </div>
+    )}
             <label>
                 Email:
-                <input type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>
+                <input className="uniform-width" type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>
             </label>
             <label>
-                LastName
-                <input type="text" value={inputData.lastName} onChange={(event) => handleInputOnChange('lastName', event)}/>
+                LastName:
+                <input className="uniform-width" type="text" value={inputData.lastName} onChange={(event) => handleInputOnChange('lastName', event)}/>
             </label>
             <label>
-                StartUtc
-                <input type="date" value={inputData.startUtc} onChange={(event) => handleOnDateChange('startUtc', event)} />
+                StartUtc:
+                <input className="uniform-width" type="date" value={inputData.startUtc} onChange={(event) => handleOnDateChange('startUtc', event)} />
             </label>
             <label>
-                EndUtc
-                <input type="date" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)} />
+                EndUtc:
+                <input className="uniform-width" type="date" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)} />
             </label>
+            <br></br>
+            <button className="dark-mode-toggle-button uniform-width" onClick={createReservation}>Create reservation</button>
         </div>
-        <hr/>
-        <button onClick={createReservation}>Create reservation</button>
-        <div style={{fontSize:'10px'}}>
+        <div style={{fontSize: '20px', marginTop: '2rem'}}>
             {reservationDetails === null ? 'No reservation fetched' : (
                 renderReservations(reservationDetails)
-            )}</div>
-
+            )}
+        </div>
     </div>
-  );
+);
 }
 
 export default App;
