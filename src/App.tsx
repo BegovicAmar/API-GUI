@@ -2,18 +2,7 @@ import React, { ChangeEvent, ChangeEventHandler, useState } from 'react';
 import './App.css';
 import samplePayload from './initData.json';
 import { generateRandomEmail, generateRandomLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
-
-interface Reservation{
-    EndUtc: string;
-    StartUtc: string;
-    Number: string;
-    Id: string;
-    ServiceTimeUnitPeriod: string;
-    LastName: string;
-}
-interface ReservationsGroupCreateResponseType {
-    Reservations: Array<Reservation>
-}
+import { fetchCreateReservation, ReservationsGroupCreateResponseType } from './api';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponseType) => {
     if (
@@ -38,7 +27,7 @@ const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupC
 function App() {
     const [darkMode, setDarkMode] = useState(false);
     const randomLastName = generateRandomLastName();
-    const [reservationDetails, setReservationDetails] = useState(null);
+    const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponseType | null>(null);
     const [inputData, setInputData] = useState({
         email: generateRandomEmail(randomLastName),
         lastName: randomLastName,
@@ -73,9 +62,8 @@ function App() {
             const updatedReservations = samplePayload.Reservations.map(reservation => {
                 return {...reservation, StartUtc: `${inputData.startUtc}T22:00:00.000Z`, EndUtc: `${inputData.endUtc}T22:00:00.000Z`};});
             const newPayload = {...samplePayload, Reservations: updatedReservations, Customer: {...samplePayload.Customer, Email: inputData.email, LastName: inputData.lastName}};
-            const reposnseMeta = await fetch("https://gx.mews-develop.com/api/bookingEngine/v1/reservationGroups/create",{ method:"POST", body: JSON.stringify(newPayload)}, )
-            const responseJson = await reposnseMeta.json();
-            const enhancedResponse = {...responseJson,Reservations: responseJson.Reservations.map((reservation: any) => ({...reservation,LastName: inputData.lastName}))};
+            const responseJson = await fetchCreateReservation(newPayload);
+            const enhancedResponse = {...responseJson,Reservations: responseJson.Reservations.map((reservation) => ({...reservation,LastName: inputData.lastName}))};
             console.log(enhancedResponse);
         setReservationDetails(enhancedResponse);
         } catch (err) {
@@ -83,6 +71,12 @@ function App() {
         }
         setLoading(false);
     }
+    // Define/fetch list of Enterprises - their Id, timezone
+
+        // v1/configurations/get - gives us ageCategories, IanaTimeZoneIdentifier,, OccupancyData
+        // -resourceCategories/getAll - spaceCategoryId,
+        //  services/getPricing - rateId,
+
 
 return (
     <div className={`App ${darkMode ? "dark-mode" : ""}`}>
