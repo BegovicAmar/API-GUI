@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  position: absolute;
+  position: relative;
 }
 
 .App-logo {
@@ -15,6 +15,7 @@
 }
 
 .App {
+  transition: background-color 250ms ease-in-out;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -22,11 +23,11 @@
   width: 100vw;
   height: 100vh;
   overflow: auto;
+  background-color: #e5e9ec;
 }
 
-.dark-mode {
-  background-color: #121212;
-  color: white;
+.dark {
+  background-color: #26272a;
 }
 
 .App-header {
@@ -94,28 +95,37 @@
 }
 
 .dark-mode-toggle-button {
-  background-color: #333;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.dark-mode-toggle-button:hover {
-  background-color: #555;
-}
-
-.dark-mode .dark-mode-toggle-button {
-  background-color: #ddd;
-  color: #333;
-}
-
-.dark-mode .dark-mode-toggle-button:hover {
-  background-color: #bbb;
+  position: absolute;
+  top: 10px;
+  left: 10px;
 }
 
 .uniform-width {
+  background-color: white;
+  color: black;
   width: 200px;
+  
+}
+
+button.uniform-width {
+  background-color: lightblue;
+  color: black;
+}
+
+.dark .uniform-width {
+  background-color: #333;
+  color: white;
+}
+
+.dark button.uniform-width {
+  background-color: #555;
+  color: white;
+}
+
+.dark .dark-mode-label {
+  color: white;
+}
+
+.light-mode-label {
+  color: black;
 }

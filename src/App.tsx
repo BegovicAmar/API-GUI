@@ -4,6 +4,8 @@ import samplePayload from './initData.json';
 import { generateRandomEmail, generateRandomLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 import { fetchCreateReservation, ReservationsGroupCreateResponseType } from './api';
 import { faker } from '@faker-js/faker';
+import clsx from 'clsx';
+import { DarkModeToggle, Mode, Props } from '@anatoliygatt/dark-mode-toggle';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponseType) => {
     if (
@@ -25,7 +27,7 @@ const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupC
 }
 
 function App() {
-    const [darkMode, setDarkMode] = useState(false);
+    const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
     const [lastName, setLastName] = useState<string>(randomLastName);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponseType | null>(null);
@@ -97,64 +99,51 @@ function App() {
         // -resourceCategories/getAll - spaceCategoryId,
         //  services/getPricing - rateId,
 
-
 return (
-    <div className={`App ${darkMode ? "dark-mode" : ""}`}>
-        <div className="center-content">
-        {loading && (
-            <div className="loader-container">
-                <div className="loader"></div>
-            </div>
-        )}
-            {/* Dark Mode Toggle Button */}
-            <button
-                className="dark-mode-toggle-button uniform-width"
-                onClick={() => {
-                    console.log("Before toggle:", darkMode);
-                    setDarkMode(!darkMode);
-                    console.log("After toggle:", darkMode);
+    <div className={clsx('App', {dark: mode === 'dark'})}>
+        <div className="dark-mode-toggle-button">
+            <DarkModeToggle
+                mode={mode}
+                dark="Dark"
+                light="Light"
+                size="sm"
+                onChange={(mode) => {
+                    setMode(mode);
+                    window.localStorage.setItem('themeMode', mode);
                 }}
-            >
-                {darkMode ? "Light Mode" : "Dark Mode"}
-            </button>
-             </div>
-        <div className="center-content">
-        {loading && (
-    <div className="loader-container">
-        <div className="loader"></div>
-    </div>
-    )}
-            <label>
-                Enterprise:
-                <select>
-                    <option>QA Sample hotel</option>
-                    <option>ANother</option>
-                </select>
-            </label>
-            <label>
-            <button onClick={handleLastNameClick}>Random</button>
+            />
+        </div>
+        <div className="center-content"> {loading && (<div className="loader-container"><div className="loader"></div></div>)}</div>
+        <div className="center-content">{loading && (<div className="loader-container"><div className="loader"></div></div>)}
+        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+            Enterprise:
+            <select className="uniform-width" >
+                <option>QA Sample hotel</option>
+                <option>Another</option>
+            </select>
+        </label>
+        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+            <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
                 LastName:
-                <input className="uniform-width" type="text" value={lastName} onChange={(event) => {setLastName(event.target.value);handleInputOnChange('lastName', event); }}/>
+                <input className="uniform-width" type="text" value={lastName} onChange={(event) => {setLastName(event.target.value); handleInputOnChange('lastName', event); }}/>
             </label>
-            <label>
-                Email:
+        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+            Email:
                 <input className="uniform-width" type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>
             </label>
-            <label>
+        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                 StartUtc:
                 <input className="uniform-width" type="date" value={inputData.startUtc} onChange={(event) => handleOnDateChange('startUtc', event)} />
             </label>
-            <label>
+        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                 EndUtc:
                 <input className="uniform-width" type="date" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)} />
             </label>
-            <br></br>
-            <button className="dark-mode-toggle-button uniform-width" onClick={createReservation}>Create reservation</button>
+        <button className="uniform-width" onClick={createReservation}>Create reservation</button>
         </div>
-        <div style={{fontSize: '20px', marginTop: '2rem'}}>
-            {reservationDetails === null ? 'No reservation fetched' : (
-                renderReservations(reservationDetails)
-            )}
+        <div style={{fontSize: '20px', marginTop: '2rem'}} 
+            className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+            {reservationDetails === null ? 'No reservation fetched' : (renderReservations(reservationDetails))}
         </div>
     </div>
 );
