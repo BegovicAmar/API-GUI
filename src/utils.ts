@@ -1,3 +1,4 @@
+import { faker } from '@faker-js/faker';
 
 export const getTodaysDate = () => {
     const today = new Date();
@@ -12,10 +13,7 @@ export const getEndDateFromStartDate = (getTodaysDate: string | number | Date) =
 };
 
 
-export const generateRandomLastName = () => {
-    const lastNames = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor'];
-    return lastNames[Math.floor(Math.random() * lastNames.length)];
-};
+export const generateRandomLastName = () => faker.person.lastName();
 
 export const generateRandomEmail = (lastName: string) => {
     const domains = ['gmail.com', 'yahoo.com', 'outlook.com'];
