@@ -1,43 +1,7 @@
 import React, { ChangeEvent, ChangeEventHandler, useState } from 'react';
 import './App.css';
-
-const samplePayload = {
-    "ConfigurationId":"e4da5c87-1b4b-4e68-841e-abc800c82505",
-    "CreditCardData":{
-        "PaymentGatewayData":null,
-        "ObfuscatedCreditCardNumber":null
-    },
-    "Customer":{
-        "Email":"sdf@d.com",
-        "LastName":"Krat"
-    },
-    "HotelId":"8a51f050-8467-4e92-84d5-abc800c810b8",
-    "LanguageCode":"en-GB",
-    "Reservations":[
-        {
-            "Identifier":"3afc03ec360266a3de0d9b3cf7d67a88f4b56ee5",
-            "RoomCategoryId":"aaae5269-f1e8-43e7-9b26-abc800c8118b",
-            "StartUtc":"2023-09-12T22:00:00.000Z",
-            "EndUtc":"2023-10-14T22:00:00.000Z",
-            "OccupancyData":[
-                {
-                    "AgeCategoryId":"16e8a466-729e-4d32-a221-ade300e410a8",
-                    "PersonCount":1
-                }
-            ],
-            "ProductIds":[
-
-            ],
-            "RateId":"fd666d4c-1472-4a61-b490-aeda00cd7e3a",
-            "Notes":"fsdf"
-        }
-    ],
-    "PromotedServiceReservations":[
-
-    ],
-    "Client":"Mews Distributor 1821.0.0",
-    "Session":"09809905205405004804809705004805005104504805704504905008404805505804805705805304809032AC2453BCF3B25E69D103EF54026E4C"
-}
+import samplePayload from './initData.json';
+import { generateRandomEmail, generateRandomLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 
 interface Reservation{
     EndUtc: string;
@@ -70,27 +34,6 @@ const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupC
     return null;
 }
 
-const getTodaysDate = () => {
-    const today = new Date();
-    return today.toISOString().split("T")[0];
-};
-
-const getEndDateFromStartDate = (getTodaysDate: string | number | Date) => {
-    const date = new Date(getTodaysDate);
-    date.setDate(date.getDate() + 2);
-    return date.toISOString().split("T")[0];
-};
-
-const generateRandomLastName = () => {
-    const lastNames = ['Smith', 'Johnson', 'Williams', 'Jones', 'Brown', 'Davis', 'Miller', 'Wilson', 'Moore', 'Taylor'];
-    return lastNames[Math.floor(Math.random() * lastNames.length)];
-};
-
-const generateRandomEmail = (lastName: string) => {
-    const domains = ['gmail.com', 'yahoo.com', 'outlook.com'];
-    const domain = domains[Math.floor(Math.random() * domains.length)];
-    return `${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@${domain}`;
-};
 
 function App() {
     const [darkMode, setDarkMode] = useState(false);
@@ -140,7 +83,7 @@ function App() {
         }
         setLoading(false);
     }
-<br/>
+
 return (
     <div className={`App ${darkMode ? "dark-mode" : ""}`}>
         <div className="center-content">
@@ -150,7 +93,7 @@ return (
             </div>
         )}
             {/* Dark Mode Toggle Button */}
-            <button 
+            <button
                 className="dark-mode-toggle-button uniform-width"
                 onClick={() => {
                     console.log("Before toggle:", darkMode);
@@ -167,6 +110,13 @@ return (
         <div className="loader"></div>
     </div>
     )}
+            <label>
+                Enterprise:
+                <select>
+                    <option>QA Sample hotel</option>
+                    <option>ANother</option>
+                </select>
+            </label>
             <label>
                 Email:
                 <input className="uniform-width" type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>

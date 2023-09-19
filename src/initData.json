@@ -1,0 +1,37 @@
+{
+  "ConfigurationId":"e4da5c87-1b4b-4e68-841e-abc800c82505",
+  "CreditCardData":{
+    "PaymentGatewayData":null,
+    "ObfuscatedCreditCardNumber":null
+  },
+  "Customer":{
+    "Email":"sdf@d.com",
+    "LastName":"Krat"
+  },
+  "HotelId":"8a51f050-8467-4e92-84d5-abc800c810b8",
+  "LanguageCode":"en-GB",
+  "Reservations":[
+    {
+      "Identifier":"3afc03ec360266a3de0d9b3cf7d67a88f4b56ee5",
+      "RoomCategoryId":"aaae5269-f1e8-43e7-9b26-abc800c8118b",
+      "StartUtc":"2023-09-12T22:00:00.000Z",
+      "EndUtc":"2023-10-14T22:00:00.000Z",
+      "OccupancyData":[
+        {
+          "AgeCategoryId":"16e8a466-729e-4d32-a221-ade300e410a8",
+          "PersonCount":1
+        }
+      ],
+      "ProductIds":[
+
+      ],
+      "RateId":"fd666d4c-1472-4a61-b490-aeda00cd7e3a",
+      "Notes":"fsdf"
+    }
+  ],
+  "PromotedServiceReservations":[
+
+  ],
+  "Client":"Mews Distributor 1821.0.0",
+  "Session":"09809905205405004804809705004805005104504805704504905008404805505804805705805304809032AC2453BCF3B25E69D103EF54026E4C"
+}
