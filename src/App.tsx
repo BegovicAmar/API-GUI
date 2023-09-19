@@ -3,6 +3,7 @@ import './App.css';
 import samplePayload from './initData.json';
 import { generateRandomEmail, generateRandomLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 import { fetchCreateReservation, ReservationsGroupCreateResponseType } from './api';
+import { faker } from '@faker-js/faker';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponseType) => {
     if (
@@ -23,10 +24,10 @@ const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupC
     return null;
 }
 
-
 function App() {
     const [darkMode, setDarkMode] = useState(false);
-    const randomLastName = generateRandomLastName();
+    const randomLastName = generateShortLastName();
+    const [lastName, setLastName] = useState<string>(randomLastName);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponseType | null>(null);
     const [inputData, setInputData] = useState({
         email: generateRandomEmail(randomLastName),
@@ -61,9 +62,9 @@ function App() {
         try {
             const updatedReservations = samplePayload.Reservations.map(reservation => {
                 return {...reservation, StartUtc: `${inputData.startUtc}T22:00:00.000Z`, EndUtc: `${inputData.endUtc}T22:00:00.000Z`};});
-            const newPayload = {...samplePayload, Reservations: updatedReservations, Customer: {...samplePayload.Customer, Email: inputData.email, LastName: inputData.lastName}};
+            const newPayload = {...samplePayload, Reservations: updatedReservations, Customer: {...samplePayload.Customer, Email: inputData.email, LastName: lastName}};
             const responseJson = await fetchCreateReservation(newPayload);
-            const enhancedResponse = {...responseJson,Reservations: responseJson.Reservations.map((reservation) => ({...reservation,LastName: inputData.lastName}))};
+            const enhancedResponse = {...responseJson,Reservations: responseJson.Reservations.map((reservation) => ({...reservation,LastName: lastName}))};
             console.log(enhancedResponse);
         setReservationDetails(enhancedResponse);
         } catch (err) {
@@ -71,6 +72,25 @@ function App() {
         }
         setLoading(false);
     }
+
+    function generateShortLastName(): string {
+        let lastName = faker.person.lastName();
+        while (lastName.length > 5) {
+            lastName = faker.person.lastName();
+        }
+        return lastName;
+    }
+    
+    function handleLastNameClick(event: React.MouseEvent<HTMLButtonElement>): void {
+        const newLastName = generateShortLastName();
+        setLastName(newLastName);
+        setInputData(prevData => ({
+            ...prevData,
+            email: generateRandomEmail(newLastName),
+            lastName: newLastName
+        }));
+    }
+
     // Define/fetch list of Enterprises - their Id, timezone
 
         // v1/configurations/get - gives us ageCategories, IanaTimeZoneIdentifier,, OccupancyData
@@ -112,12 +132,13 @@ return (
                 </select>
             </label>
             <label>
-                Email:
-                <input className="uniform-width" type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>
+            <button onClick={handleLastNameClick}>Random</button>
+                LastName:
+                <input className="uniform-width" type="text" value={lastName} onChange={(event) => {setLastName(event.target.value);handleInputOnChange('lastName', event); }}/>
             </label>
             <label>
-                LastName:
-                <input className="uniform-width" type="text" value={inputData.lastName} onChange={(event) => handleInputOnChange('lastName', event)}/>
+                Email:
+                <input className="uniform-width" type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>
             </label>
             <label>
                 StartUtc:
