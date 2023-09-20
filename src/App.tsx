@@ -6,7 +6,8 @@ import { fetchCreateReservation, reservationsGroupCreateResponse } from './api';
 import { faker } from '@faker-js/faker';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode, Props } from '@anatoliygatt/dark-mode-toggle';
-import * as QRCode from 'qrcode';
+import QRCode from 'qrcode.react';
+
 
 const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -28,13 +29,26 @@ const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupC
         </div>
     ));
 
+    // Generate the formatted JSON data
+    const formattedData = {
+        Reservations: reservationsGroupCreateResponse.Reservations?.map(reservation => ({
+            Id: reservation.Id,
+            GroupId: "00000000-0000-0000-0000-000000000000",
+            CustomerId: reservationsGroupCreateResponse.ReservationGroups?.[0]?.CustomerId || ""
+        }))
+    };
+    const jsonData = JSON.stringify(formattedData);
+
     return (
         <>
             {reservationItems}
             {reservationGroupItems}
+            <QRCode value={jsonData} />
         </>
     );
 }
+
+
 
 function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
