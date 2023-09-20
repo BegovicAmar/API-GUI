@@ -8,7 +8,6 @@ import clsx from 'clsx';
 import { DarkModeToggle, Mode, Props } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
 
-
 const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
 
@@ -29,7 +28,17 @@ const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupC
         </div>
     ));
 
-    // Generate the formatted JSON data
+    return (
+        <>
+            {reservationItems}
+            {reservationGroupItems}
+        </>
+    );
+};
+
+const getReservationData = (reservationsGroupCreateResponse?: reservationsGroupCreateResponse | null) => {
+    if (!reservationsGroupCreateResponse) return null;
+
     const formattedData = {
         Reservations: reservationsGroupCreateResponse.Reservations?.map(reservation => ({
             Id: reservation.Id,
@@ -37,18 +46,8 @@ const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupC
             CustomerId: reservationsGroupCreateResponse.ReservationGroups?.[0]?.CustomerId || ""
         }))
     };
-    const jsonData = JSON.stringify(formattedData);
-
-    return (
-        <>
-            {reservationItems}
-            {reservationGroupItems}
-            <QRCode value={jsonData} />
-        </>
-    );
-}
-
-
+    return JSON.stringify(formattedData);
+};
 
 function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
@@ -104,7 +103,6 @@ function App() {
                 Reservations: enhancedReservations,
                 ReservationGroups: enhancedReservationGroups
             };
-            
             console.log(enhancedResponse);
             setReservationDetails(enhancedResponse);            
         } catch (err) {
@@ -136,6 +134,9 @@ function App() {
         // v1/configurations/get - gives us ageCategories, IanaTimeZoneIdentifier,, OccupancyData
         // -resourceCategories/getAll - spaceCategoryId,
         //  services/getPricing - rateId,
+
+        const jsonData = getReservationData(reservationDetails);
+        const [isQRZoomed, setQRZoomed] = useState(false);
 
 return (
     <div className={clsx('App', {dark: mode === 'dark'})}>
@@ -183,7 +184,22 @@ return (
             className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
             {reservationDetails === null ? 'No reservation fetched' : (renderReservations(reservationDetails))}
         </div>
+            {/* Render QRCode at the bottom */}
+            {jsonData && (
+    <div 
+        className={isQRZoomed ? 'qr-zoomed-container' : ''}
+        onClick={() => setQRZoomed(!isQRZoomed)}
+    >
+        <div 
+            className="qr-wrapper"
+            style={{ transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)', transition: 'transform 0.3s' }}
+        >
+            <QRCode value={jsonData} />
+        </div>
     </div>
+)}
+        </div>
+
 );
 }
 
