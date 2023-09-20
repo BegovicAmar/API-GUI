@@ -2,35 +2,45 @@ import React, { ChangeEvent, ChangeEventHandler, useState } from 'react';
 import './App.css';
 import samplePayload from './initData.json';
 import { generateRandomEmail, generateRandomLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
-import { fetchCreateReservation, ReservationsGroupCreateResponseType } from './api';
+import { fetchCreateReservation, reservationsGroupCreateResponse } from './api';
 import { faker } from '@faker-js/faker';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode, Props } from '@anatoliygatt/dark-mode-toggle';
+import * as QRCode from 'qrcode';
 
-const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponseType) => {
-    if (
-        reservationsGroupCreateResponse &&
-        reservationsGroupCreateResponse.Reservations &&
-        Array.isArray(reservationsGroupCreateResponse.Reservations)
-    ) {
-        return reservationsGroupCreateResponse.Reservations.map((reservation) => (
-            <div key={reservation.Id}>
-                <p>LastName: {reservation.LastName}</p>
-                <p>ReservationNumber: {reservation.Number}</p>
-                <p>ReservationId: {reservation.Id}</p>
-                <p>StartUtc: {reservation.StartUtc}</p>
-                <p>EndUtc: {reservation.EndUtc}</p>
-            </div>
-        )
-    );}
-    return null;
+const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupCreateResponse) => {
+    if (!reservationsGroupCreateResponse) return null;
+
+    const reservationItems = reservationsGroupCreateResponse.Reservations?.map((reservation) => (
+        <div key={reservation.Id}>
+            <p>LastName: {reservation.LastName}</p>
+            <p>ReservationNumber: {reservation.Number}</p>
+            <p>ReservationId: {reservation.Id}</p>
+            <p>StartUtc: {reservation.StartUtc}</p>
+            <p>EndUtc: {reservation.EndUtc}</p>
+        </div>
+    ));
+
+    const reservationGroupItems = reservationsGroupCreateResponse.ReservationGroups?.map((reservationGroup) => (
+        <div key={reservationGroup.Id}>
+            <p>ReservationGroupId: {reservationGroup.Id}</p>
+            <p>CustomerId: {reservationGroup.CustomerId}</p>
+        </div>
+    ));
+
+    return (
+        <>
+            {reservationItems}
+            {reservationGroupItems}
+        </>
+    );
 }
 
 function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
     const [lastName, setLastName] = useState<string>(randomLastName);
-    const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponseType | null>(null);
+    const [reservationDetails, setReservationDetails] = useState<reservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
         email: generateRandomEmail(randomLastName),
         lastName: randomLastName,
@@ -66,9 +76,23 @@ function App() {
                 return {...reservation, StartUtc: `${inputData.startUtc}T22:00:00.000Z`, EndUtc: `${inputData.endUtc}T22:00:00.000Z`};});
             const newPayload = {...samplePayload, Reservations: updatedReservations, Customer: {...samplePayload.Customer, Email: inputData.email, LastName: lastName}};
             const responseJson = await fetchCreateReservation(newPayload);
-            const enhancedResponse = {...responseJson,Reservations: responseJson.Reservations.map((reservation) => ({...reservation,LastName: lastName}))};
+            const enhancedReservations = responseJson.Reservations.map((reservation) => ({
+                ...reservation,
+                LastName: lastName
+            }));
+            
+            const enhancedReservationGroups = responseJson.ReservationGroups.map((group) => ({
+                ...group
+            }));
+            
+            const enhancedResponse = {
+                ...responseJson,
+                Reservations: enhancedReservations,
+                ReservationGroups: enhancedReservationGroups
+            };
+            
             console.log(enhancedResponse);
-        setReservationDetails(enhancedResponse);
+            setReservationDetails(enhancedResponse);            
         } catch (err) {
             console.error(err, 'CATCH')
         }
