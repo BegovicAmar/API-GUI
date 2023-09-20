@@ -7,6 +7,7 @@ import { faker } from '@faker-js/faker';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode, Props } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
+import loader from './components/loader'
 
 const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -83,7 +84,7 @@ function App() {
         }
     }
     const createReservation = async ()=> {
-        setLoading(true);
+        loader.show();
         try {
             const updatedReservations = samplePayload.Reservations.map(reservation => {
                 return {...reservation, StartUtc: `${inputData.startUtc}T22:00:00.000Z`, EndUtc: `${inputData.endUtc}T22:00:00.000Z`};});
@@ -108,7 +109,7 @@ function App() {
         } catch (err) {
             console.error(err, 'CATCH')
         }
-        setLoading(false);
+        loader.hide();
     }
 
     function generateShortLastName(): string {
@@ -152,8 +153,7 @@ return (
                 }}
             />
         </div>
-        <div className="center-content"> {loading && (<div className="loader-container"><div className="loader"></div></div>)}</div>
-        <div className="center-content">{loading && (<div className="loader-container"><div className="loader"></div></div>)}
+        <div className="center-content"> {loading && (<div className="loader-container"><div className="loader"></div></div>)}
         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
             Enterprise:
             <select className="uniform-width" >
@@ -184,16 +184,9 @@ return (
             className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
             {reservationDetails === null ? 'No reservation fetched' : (renderReservations(reservationDetails))}
         </div>
-            {/* Render QRCode at the bottom */}
             {jsonData && (
-    <div 
-        className={isQRZoomed ? 'qr-zoomed-container' : ''}
-        onClick={() => setQRZoomed(!isQRZoomed)}
-    >
-        <div 
-            className="qr-wrapper"
-            style={{ transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)', transition: 'transform 0.3s' }}
-        >
+        <div className={isQRZoomed ? 'qr-zoomed-container' : ''} onClick={() => setQRZoomed(!isQRZoomed)}>
+        <div className="qr-wrapper" style={{ transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)', transition: 'transform 0.3s' }}>
             <QRCode value={jsonData} />
         </div>
     </div>
