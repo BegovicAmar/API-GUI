@@ -7,11 +7,18 @@ interface Reservation {
     LastName: string;
 }
 
-export interface ReservationsGroupCreateResponseType {
-    Reservations: Array<Reservation>
+interface ReservationGroup
+{
+    Id: string;
+    CustomerId: string;
 }
 
-export const fetchCreateReservation = async (payload: any): Promise<ReservationsGroupCreateResponseType> => {
+export interface reservationsGroupCreateResponse {
+    ReservationGroups: Array<ReservationGroup>;
+    Reservations: Array<Reservation>;
+}
+
+export const fetchCreateReservation = async (payload: any): Promise<reservationsGroupCreateResponse> => {
     const reposnseMeta = await fetch("https://gx.mews-develop.com/api/bookingEngine/v1/reservationGroups/create",{ method:"POST", body: JSON.stringify(payload)}, )
     return await reposnseMeta.json();
 }
