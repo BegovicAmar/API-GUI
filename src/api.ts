@@ -37,7 +37,7 @@ const authCall = async <T>(endpoint: string, payload: T) => {
     return await reposnseMeta.json();
 };
 
-export const fetchCreateReservation = async (payload: any): Promise<ReservationsGroupCreateResponse> => {
+export const fetchCreateReservation = async (payload: unknown): Promise<ReservationsGroupCreateResponse> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/reservationGroups/create`, payload);
 };
 

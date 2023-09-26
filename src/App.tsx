@@ -8,6 +8,7 @@ import clsx from 'clsx';
 import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
 import loader from './components/loader';
+import moment from 'moment-timezone';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -93,35 +94,63 @@ function App() {
     const createReservation = async () => {
         loader.show();
         try {
+
+            const selectedEnterprise = configurationData?.Enterprises?.find(
+                enterprise => enterprise.Id === selectedEnterpriseId
+            );
+
+            const timezone = selectedEnterprise?.IanaTimeZoneIdentifier;
+            
+            if (!timezone) {
+                console.error('Timezone is undefined');
+                loader.hide();
+                return;
+            }
+            
+            const startMoment = moment.tz(`${inputData.startUtc}T00:00:00`, timezone);
+            const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
+    
             const updatedReservations = samplePayload.Reservations.map(reservation => {
-                return {...reservation, StartUtc: `${inputData.startUtc}T22:00:00.000Z`, EndUtc: `${inputData.endUtc}T22:00:00.000Z`};
+                return {
+                    ...reservation,
+                    StartUtc: startMoment.toISOString(),
+                    EndUtc: endMoment.toISOString()
+                };
             });
+    
             const newPayload = {
                 ...samplePayload,
                 Reservations: updatedReservations,
-                Customer: {...samplePayload.Customer, Email: inputData.email, LastName: lastName}
+                Customer: {
+                    ...samplePayload.Customer,
+                    Email: inputData.email,
+                    LastName: lastName
+                }
             };
+            
             const responseJson = await fetchCreateReservation(newPayload);
             const enhancedReservations = responseJson.Reservations.map((reservation) => ({
                 ...reservation,
                 LastName: lastName
             }));
-
+    
             const enhancedReservationGroups = responseJson.ReservationGroups.map((group) => ({
                 ...group
             }));
-
+    
             const enhancedResponse = {
                 ...responseJson,
                 Reservations: enhancedReservations,
                 ReservationGroups: enhancedReservationGroups
             };
+            
             setReservationDetails(enhancedResponse);
         } catch (err) {
             console.error(err, 'CATCH');
         }
         loader.hide();
     };
+    
 
     function generateShortLastName(): string {
         let lastName = faker.person.lastName();
@@ -172,9 +201,9 @@ function App() {
                     <select className="uniform-width" onChange={handleSelectEnterprise} value={selectedEnterpriseId}>
                         <option value="8a51f050-8467-4e92-84d5-abc800c810b8">Bespin</option>
                         <option value="dab943a7-7f00-4656-b383-ae5a01007136">Mews Guest Journey Hotel</option>
+                        <option value="5565d322-2505-4450-8284-aca8016c4844">Chicago UTC</option>
                     </select>
                 </label>
-                {configurationData?.Enterprises?.[0].IanaTimeZoneIdentifier != null ? (<span style={{color: 'red'}}>DEBUG: EntepriseTimezone: {configurationData?.Enterprises?.[0].IanaTimeZoneIdentifier}</span>): null}
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                     <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
                     LastName:
