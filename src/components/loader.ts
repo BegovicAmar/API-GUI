@@ -4,23 +4,23 @@ class Loader {
     textElement: HTMLElement;
 
     constructor() {
-        this.container = document.createElement("div");
-        this.loaderElement = document.createElement("div");
-        this.textElement = document.createElement("div");
+        this.container = document.createElement('div');
+        this.loaderElement = document.createElement('div');
+        this.textElement = document.createElement('div');
 
         this.init();
     }
 
     private init(): void {
         // Setup loader container
-        this.container.className = "loader-container";
+        this.container.className = 'loader-container';
 
         // Setup loader div
-        this.loaderElement.className = "loader";
+        this.loaderElement.className = 'loader';
 
         // Setup text div
-        this.textElement.className = "loader-text";
-        this.textElement.textContent = "Creating reservation...";
+        this.textElement.className = 'loader-text';
+        this.textElement.textContent = 'Creating reservation...';
 
         // Append elements
         this.container.appendChild(this.loaderElement);

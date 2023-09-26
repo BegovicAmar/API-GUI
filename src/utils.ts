@@ -2,14 +2,14 @@ import { faker } from '@faker-js/faker';
 
 export const getTodaysDate = () => {
     const today = new Date();
-    return today.toISOString().split("T")[0];
+    return today.toISOString().split('T')[0];
 };
 
 export const getEndDateFromStartDate = (getTodaysDate: string | number | Date) => {
     const date = new Date(getTodaysDate);
     date.setDate(date.getDate() + 2);
 
-    return date.toISOString().split("T")[0];
+    return date.toISOString().split('T')[0];
 };
 
 
