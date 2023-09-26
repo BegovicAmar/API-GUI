@@ -1,20 +1,10 @@
 .App {
   text-align: center;
-  position: absolute;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+  position: relative;
 }
 
 .App {
+  transition: background-color 250ms ease-in-out;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -22,11 +12,11 @@
   width: 100vw;
   height: 100vh;
   overflow: auto;
+  background-color: #e5e9ec;
 }
 
-.dark-mode {
-  background-color: #121212;
-  color: white;
+.dark {
+  background-color: #26272a;
 }
 
 .App-header {
@@ -62,26 +52,18 @@
   width: 100%;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
 .loader-container {
-  position: fixed;       /* Fixed positioning */
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;           /* Span the full viewport */
+  width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.5);  /* Semi-transparent black background */
+  background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
   display: flex;
-  justify-content: center; /* Center the loader horizontally */
-  align-items: center;     /* Center the loader vertically */
-  z-index: 1000;           /* High z-index to make it on top of everything */
+  justify-content: center; /* Horizontally center the contents */
+  align-items: center;     /* Vertically center the contents */
+  flex-direction: column;  /* Stack the loader and the text vertically */
+  z-index: 1000;           /* High z-index to ensure it overlays other elements */
 }
 
 .loader {
@@ -90,32 +72,74 @@
   border-radius: 50%;
   width: 40px;
   height: 40px;
-  animation: App-logo-spin 1s linear infinite;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px; /* Some space between the loader and the text */
+}
+
+.loader-text {
+  color: white;
+  font-size: 16px;
+  text-align: center;
+}
+
+@keyframes spin {
+  0% {
+      transform: rotate(0deg);
+  }
+  100% {
+      transform: rotate(360deg);
+  }
 }
 
 .dark-mode-toggle-button {
-  background-color: #333;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.dark-mode-toggle-button:hover {
-  background-color: #555;
-}
-
-.dark-mode .dark-mode-toggle-button {
-  background-color: #ddd;
-  color: #333;
-}
-
-.dark-mode .dark-mode-toggle-button:hover {
-  background-color: #bbb;
+  position: absolute;
+  top: 10px;
+  left: 10px;
 }
 
 .uniform-width {
+  background-color: white;
+  color: black;
   width: 200px;
+  
+}
+
+button.uniform-width {
+  background-color: lightblue;
+  color: black;
+}
+
+.dark .uniform-width {
+  background-color: #333;
+  color: white;
+}
+
+.dark button.uniform-width {
+  background-color: #555;
+  color: white;
+}
+
+.dark .dark-mode-label {
+  color: white;
+}
+
+.light-mode-label {
+  color: black;
+}
+
+.qr-zoomed-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height:  100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* to ensure it's above other elements */
+}
+
+.qr-wrapper {
+  cursor: pointer; /* to indicate clickable */
 }
