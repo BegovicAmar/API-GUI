@@ -1,15 +1,15 @@
-import React, { ChangeEvent, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import './App.css';
 import samplePayload from './initData.json';
 import { generateRandomEmail, getEndDateFromStartDate, getTodaysDate } from './utils';
-import { fetchCreateReservation, reservationsGroupCreateResponse } from './api';
+import { ConfigurationGetResponse, fetchCreateReservation, fetchEnterpriseConfiguration, ReservationsGroupCreateResponse } from './api';
 import { faker } from '@faker-js/faker';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
 import loader from './components/loader';
 
-const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupCreateResponse) => {
+const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
 
     const reservationItems = reservationsGroupCreateResponse.Reservations?.map((reservation) => (
@@ -37,7 +37,7 @@ const renderReservations = (reservationsGroupCreateResponse?: reservationsGroupC
     );
 };
 
-const getReservationData = (reservationsGroupCreateResponse?: reservationsGroupCreateResponse | null) => {
+const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse | null) => {
     if (!reservationsGroupCreateResponse) return null;
 
     const formattedData = {
@@ -53,14 +53,23 @@ const getReservationData = (reservationsGroupCreateResponse?: reservationsGroupC
 function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
+    const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
     const [lastName, setLastName] = useState<string>(randomLastName);
-    const [reservationDetails, setReservationDetails] = useState<reservationsGroupCreateResponse | null>(null);
+    const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
         email: generateRandomEmail(randomLastName),
         lastName: randomLastName,
         startUtc: getTodaysDate(),
         endUtc: getEndDateFromStartDate(getTodaysDate())
     });
+
+    useEffect(() => {
+        fetchEnterpriseConfiguration(selectedEnterpriseId).then(response => {
+            setConfigurationData(response);
+        });
+    }, [selectedEnterpriseId]);
+
+    const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
 
     const handleInputOnChange = (name: string, event: ChangeEvent<HTMLInputElement>) => {
         setInputData({...inputData, [name]: event.target.value});
@@ -107,7 +116,6 @@ function App() {
                 Reservations: enhancedReservations,
                 ReservationGroups: enhancedReservationGroups
             };
-            console.log(enhancedResponse);
             setReservationDetails(enhancedResponse);
         } catch (err) {
             console.error(err, 'CATCH');
@@ -141,7 +149,9 @@ function App() {
 
     const jsonData = getReservationData(reservationDetails);
     const [isQRZoomed, setQRZoomed] = useState(false);
-
+    const handleSelectEnterprise = async (event: ChangeEvent<HTMLSelectElement>) => {
+        selectEnterprise(event.target.value);
+    };
     return (
         <div className={clsx('App', {dark: mode === 'dark'})}>
             <div className="dark-mode-toggle-button">
@@ -159,11 +169,12 @@ function App() {
             <div className="center-content">
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                     Enterprise:
-                    <select className="uniform-width">
-                        <option>QA Sample hotel</option>
-                        <option>Another</option>
+                    <select className="uniform-width" onChange={handleSelectEnterprise} value={selectedEnterpriseId}>
+                        <option value="8a51f050-8467-4e92-84d5-abc800c810b8">Bespin</option>
+                        <option value="dab943a7-7f00-4656-b383-ae5a01007136">Mews Guest Journey Hotel</option>
                     </select>
                 </label>
+                {configurationData?.Enterprises?.[0].IanaTimeZoneIdentifier != null ? (<span style={{color: 'red'}}>DEBUG: EntepriseTimezone: {configurationData?.Enterprises?.[0].IanaTimeZoneIdentifier}</span>): null}
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                     <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
                     LastName:
