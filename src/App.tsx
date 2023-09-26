@@ -94,7 +94,6 @@ function App() {
     const createReservation = async () => {
         loader.show();
         try {
-
             const selectedEnterprise = configurationData?.Enterprises?.find(
                 enterprise => enterprise.Id === selectedEnterpriseId
             );
@@ -111,21 +110,13 @@ function App() {
             const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
     
             const updatedReservations = samplePayload.Reservations.map(reservation => {
-                return {
-                    ...reservation,
-                    StartUtc: startMoment.toISOString(),
-                    EndUtc: endMoment.toISOString()
-                };
+                return {...reservation, StartUtc: startMoment.toISOString(), EndUtc: endMoment.toISOString()};
             });
     
             const newPayload = {
                 ...samplePayload,
                 Reservations: updatedReservations,
-                Customer: {
-                    ...samplePayload.Customer,
-                    Email: inputData.email,
-                    LastName: lastName
-                }
+                Customer: {...samplePayload.Customer, Email: inputData.email, LastName: lastName}
             };
             
             const responseJson = await fetchCreateReservation(newPayload);
@@ -151,7 +142,6 @@ function App() {
         loader.hide();
     };
     
-
     function generateShortLastName(): string {
         let lastName = faker.person.lastName();
         while (lastName.length > 5) {
