@@ -15,6 +15,13 @@ export const getEndDateFromStartDate = (getTodaysDate: string | number | Date) =
 
 export const generateRandomLastName = () => faker.person.lastName();
 
+export const generateShortLastName = (): string => {
+    let lastName = faker.person.lastName();
+    while (lastName.length > 5) {
+        lastName = faker.person.lastName();
+    }
+    return lastName;
+};
 export const generateRandomEmail = (lastName: string) => {
     const domains = ['gmail.com', 'yahoo.com', 'outlook.com'];
     const domain = domains[Math.floor(Math.random() * domains.length)];

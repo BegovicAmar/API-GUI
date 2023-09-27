@@ -1,13 +1,18 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import './App.css';
-import samplePayload from './initData.json';
-import { generateRandomEmail, getEndDateFromStartDate, getTodaysDate } from './utils';
-import { ConfigurationGetResponse, fetchCreateReservation, fetchEnterpriseConfiguration, ReservationsGroupCreateResponse } from './api';
-import { faker } from '@faker-js/faker';
+import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
+import {
+    ConfigurationGetResponse, CreateReservationGroupPayload,
+    createSingleReservation,
+    fetchCreateReservation,
+    fetchEnterpriseConfiguration,
+    ReservationsGroupCreateResponse
+} from './api';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
 import loader from './components/loader';
+import moment from 'moment-timezone';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -93,14 +98,44 @@ function App() {
     const createReservation = async () => {
         loader.show();
         try {
-            const updatedReservations = samplePayload.Reservations.map(reservation => {
-                return {...reservation, StartUtc: `${inputData.startUtc}T22:00:00.000Z`, EndUtc: `${inputData.endUtc}T22:00:00.000Z`};
+            const selectedEnterprise = configurationData?.Enterprises?.find(
+                enterprise => enterprise.Id === selectedEnterpriseId
+            );
+            const selectedConfiguration = configurationData?.BookingEngines?.[0];
+
+            const timezone = selectedEnterprise?.IanaTimeZoneIdentifier;
+
+            if (!timezone || selectedConfiguration?.Id == null) {
+                console.error('Timezone or configurationId is missing');
+                loader.hide();
+                return;
+            }
+
+            const startMoment = moment.tz(`${inputData.startUtc}T00:00:00`, timezone);
+            const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
+
+            const reservation = createSingleReservation({
+                Identifier: Math.random().toString(),
+                StartUtc: startMoment.toISOString(),
+                EndUtc: endMoment.toISOString(),
+                OccupancyData:[{
+                    'AgeCategoryId':'16e8a466-729e-4d32-a221-ade300e410a8',
+                    'PersonCount':1
+                }],
+                ProductIds: [],
+                RateId: 'fd666d4c-1472-4a61-b490-aeda00cd7e3a',
+                RoomCategoryId: 'aaae5269-f1e8-43e7-9b26-abc800c8118b',
+                Notes: null,
             });
-            const newPayload = {
-                ...samplePayload,
-                Reservations: updatedReservations,
-                Customer: {...samplePayload.Customer, Email: inputData.email, LastName: lastName}
+
+            const newPayload: CreateReservationGroupPayload = {
+                ConfigurationId: selectedConfiguration?.Id,
+                CreditCardData: null, // TOOD maybe we donth have to use them
+                Reservations: [reservation],
+                Customer: { Email: inputData.email, LastName: lastName},
+                HotelId: selectedEnterpriseId,
             };
+
             const responseJson = await fetchCreateReservation(newPayload);
             const enhancedReservations = responseJson.Reservations.map((reservation) => ({
                 ...reservation,
@@ -116,6 +151,7 @@ function App() {
                 Reservations: enhancedReservations,
                 ReservationGroups: enhancedReservationGroups
             };
+
             setReservationDetails(enhancedResponse);
         } catch (err) {
             console.error(err, 'CATCH');
@@ -123,13 +159,6 @@ function App() {
         loader.hide();
     };
 
-    function generateShortLastName(): string {
-        let lastName = faker.person.lastName();
-        while (lastName.length > 5) {
-            lastName = faker.person.lastName();
-        }
-        return lastName;
-    }
 
     function handleLastNameClick(): void {
         const newLastName = generateShortLastName();
@@ -172,9 +201,9 @@ function App() {
                     <select className="uniform-width" onChange={handleSelectEnterprise} value={selectedEnterpriseId}>
                         <option value="8a51f050-8467-4e92-84d5-abc800c810b8">Bespin</option>
                         <option value="dab943a7-7f00-4656-b383-ae5a01007136">Mews Guest Journey Hotel</option>
+                        <option value="5565d322-2505-4450-8284-aca8016c4844">Chicago UTC</option>
                     </select>
                 </label>
-                {configurationData?.Enterprises?.[0].IanaTimeZoneIdentifier != null ? (<span style={{color: 'red'}}>DEBUG: EntepriseTimezone: {configurationData?.Enterprises?.[0].IanaTimeZoneIdentifier}</span>): null}
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                     <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
                     LastName:
