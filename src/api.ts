@@ -1,4 +1,4 @@
-interface Reservation {
+interface ReservationResponse {
     EndUtc: string;
     StartUtc: string;
     Number: string;
@@ -14,7 +14,7 @@ interface ReservationGroup {
 
 export interface ReservationsGroupCreateResponse {
     ReservationGroups: Array<ReservationGroup>;
-    Reservations: Array<Reservation>;
+    Reservations: Array<ReservationResponse>;
 }
 
 interface AuthOptions {
@@ -37,8 +37,44 @@ const authCall = async <T>(endpoint: string, payload: T) => {
     return await reposnseMeta.json();
 };
 
-export const fetchCreateReservation = async (payload: unknown): Promise<ReservationsGroupCreateResponse> => {
+interface CreditCardData {
+    PaymentGatewayData: string | null;
+    ObfuscatedCreditCardNumber:string | null;
+}
+
+interface OccupancyDataField {
+    AgeCategoryId : string;
+    PersonCount: number;
+}
+export interface ReservationRequest {
+    Identifier: string;
+    RoomCategoryId: string;
+    StartUtc: string; //utc times
+    EndUtc:string // utc
+    OccupancyData: Array<OccupancyDataField>
+    ProductIds: string[];
+    RateId: string;
+    Notes: null | string;
+}
+
+export interface CreateReservationGroupPayload {
+    ConfigurationId: string;
+    CreditCardData: CreditCardData | null;
+    Customer: {
+        Email: string;
+        LastName: string;
+    },
+    HotelId: string;
+    Reservations: Array<ReservationRequest>;
+    PromotedServiceReservations?: Array<unknown>;
+}
+
+export const fetchCreateReservation = async (payload: CreateReservationGroupPayload): Promise<ReservationsGroupCreateResponse> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/reservationGroups/create`, payload);
+};
+
+export const createSingleReservation = (res: ReservationRequest) => {
+    return res;
 };
 
 interface ConfigurationOption {
@@ -50,8 +86,21 @@ interface Enterprise {
     Id: string;
     IanaTimeZoneIdentifier: string;
 }
+interface BookingEngine {
+    Id: string;
+    ServiceId: string;
+}
+interface AgeCategory {
+    Id: string;
+    ServiceId: string;
+    Classification: 'Adult' | 'Child';
+    IsDefault: boolean;
+}
+
 export interface ConfigurationGetResponse {
     Enterprises: Enterprise[];
+    BookingEngines: BookingEngine[];
+    AgeCategories: AgeCategory[];
 }
 
 export const fetchConfiguration = async (payload: ConfigurationOption): Promise<ConfigurationGetResponse> => {
