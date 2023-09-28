@@ -89,9 +89,12 @@ function App() {
     useEffect(() => {
         const fetchAgeCategories = async () => {
             try {
-                const enterpriseId = selectedEnterpriseId; // Use the currently selected enterpriseId
+                const enterpriseId = selectedEnterpriseId; 
                 const response = await fetchEnterpriseConfiguration(enterpriseId);
                 setAgeCategoryIds(response.AgeCategories.map(category => category.Id)); 
+                if (response.AgeCategories.length > 0) {
+                    setSelectedAgeCategoryId(response.AgeCategories[0].Id);
+                }
             } catch (error) {
                 console.error('Error fetching Age Category IDs:', error);
             }
@@ -99,6 +102,7 @@ function App() {
         
         fetchAgeCategories();
     }, [selectedEnterpriseId]);
+    
     
 
     const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -120,7 +124,6 @@ function App() {
             });
         }
     };
-
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -138,6 +141,11 @@ function App() {
                         });
                     }
                     setResourceCategoryIds(fetchedResourceCategoryIds);
+    
+                    // If there are any resourceCategoryIds fetched, set the first one as selected
+                    if (fetchedResourceCategoryIds.length > 0) {
+                        setSelectedResourceCategoryId(fetchedResourceCategoryIds[0]);
+                    }
                 }
             } catch (error) {
                 console.error('Error fetching data', error);
@@ -146,6 +154,7 @@ function App() {
     
         fetchData();
     }, [selectedEnterpriseId]);
+    
 
 
     const createReservation = async () => {
