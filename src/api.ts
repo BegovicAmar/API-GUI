@@ -112,7 +112,7 @@ export const fetchEnterpriseConfiguration = async (entepriseId: string) => {
     return fetchConfiguration({Ids:[entepriseId], PrimaryId: entepriseId});
 };
 
-interface ResourceCategoryPayload {
+export interface ResourceCategoryPayload {
     ServiceId: string;
 }
 

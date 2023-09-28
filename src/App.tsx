@@ -6,6 +6,8 @@ import {
     createSingleReservation,
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
+    fetchResourceCategoryId,
+    ResourceCategoryPayload,
     ReservationsGroupCreateResponse
 } from './api';
 import clsx from 'clsx';
@@ -61,6 +63,8 @@ function App() {
     const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
     const [ageCategoryIds, setAgeCategoryIds] = useState<string[]>([]);
     const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string>('');
+    const [resourceCategoryIds, setResourceCategoryIds] = useState<string[]>([]);
+    const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string>('');
     const [lastName, setLastName] = useState<string>(randomLastName);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
@@ -116,6 +120,34 @@ function App() {
             });
         }
     };
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const configData = await fetchEnterpriseConfiguration(selectedEnterpriseId);
+                setConfigurationData(configData);
+                
+                const fetchedResourceCategoryIds: string[] = [];
+                if (configData?.BookingEngines) {
+                    for (const bookingEngine of configData.BookingEngines) {
+                        const serviceId = bookingEngine.ServiceId;
+                        const payload: ResourceCategoryPayload = { ServiceId: serviceId };
+                        const resourceCategoryResponse = await fetchResourceCategoryId(payload);
+                        resourceCategoryResponse.ResourceCategories.forEach(category => {
+                            fetchedResourceCategoryIds.push(category.Id);
+                        });
+                    }
+                    setResourceCategoryIds(fetchedResourceCategoryIds);
+                }
+            } catch (error) {
+                console.error('Error fetching data', error);
+            }
+        };
+    
+        fetchData();
+    }, [selectedEnterpriseId]);
+
+
     const createReservation = async () => {
         loader.show();
         try {
@@ -145,7 +177,7 @@ function App() {
                 }],
                 ProductIds: [],
                 RateId: 'fd666d4c-1472-4a61-b490-aeda00cd7e3a',
-                RoomCategoryId: 'aaae5269-f1e8-43e7-9b26-abc800c8118b',
+                RoomCategoryId: selectedResourceCategoryId,
                 Notes: null,
             });
 
@@ -201,6 +233,10 @@ function App() {
     const handleSelectEnterprise = async (event: ChangeEvent<HTMLSelectElement>) => {
         selectEnterprise(event.target.value);
     };
+
+    const handleResourceCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedResourceCategoryId(event.target.value);
+    };
     return (
         <div className={clsx('App', {dark: mode === 'dark'})}>
             <div className="dark-mode-toggle-button">
@@ -222,6 +258,18 @@ function App() {
                         <option value="8a51f050-8467-4e92-84d5-abc800c810b8">Bespin</option>
                         <option value="dab943a7-7f00-4656-b383-ae5a01007136">Mews Guest Journey Hotel</option>
                         <option value="5565d322-2505-4450-8284-aca8016c4844">Chicago UTC</option>
+                    </select>
+                </label>
+                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+        Resource Category:
+                    <select 
+                        className="uniform-width" 
+                        value={selectedResourceCategoryId} 
+                        onChange={handleResourceCategoryIdChange}
+                    >
+                        {resourceCategoryIds.map(id => (
+                            <option key={id} value={id}>{id}</option>
+                        ))}
                     </select>
                 </label>
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
