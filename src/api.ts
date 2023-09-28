@@ -111,3 +111,21 @@ export const fetchConfiguration = async (payload: ConfigurationOption): Promise<
 export const fetchEnterpriseConfiguration = async (entepriseId: string) => {
     return fetchConfiguration({Ids:[entepriseId], PrimaryId: entepriseId});
 };
+
+interface ResourceCategoryPayload {
+    ServiceId: string;
+}
+
+interface ResourceCategory {
+    Id: string;
+    Name: Record<string, string>;
+    ServiceId: string;
+}
+
+interface ResourceCategoryResponse {
+    ResourceCategories: Array<ResourceCategory>;
+}
+
+export const fetchResourceCategoryId = async (payload: ResourceCategoryPayload): Promise<ResourceCategoryResponse> => {
+    return authCall(`${ENV_URL}/api/bookingEngine/v1/resourceCategories/getAll`, payload);
+};
