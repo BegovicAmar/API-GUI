@@ -141,8 +141,6 @@ function App() {
                         });
                     }
                     setResourceCategoryIds(fetchedResourceCategoryIds);
-    
-                    // If there are any resourceCategoryIds fetched, set the first one as selected
                     if (fetchedResourceCategoryIds.length > 0) {
                         setSelectedResourceCategoryId(fetchedResourceCategoryIds[0]);
                     }
@@ -154,8 +152,6 @@ function App() {
     
         fetchData();
     }, [selectedEnterpriseId]);
-    
-
 
     const createReservation = async () => {
         loader.show();
