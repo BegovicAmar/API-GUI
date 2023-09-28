@@ -59,6 +59,8 @@ function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
     const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
+    const [ageCategoryIds, setAgeCategoryIds] = useState<string[]>([]);
+    const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string>('');
     const [lastName, setLastName] = useState<string>(randomLastName);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
@@ -78,6 +80,25 @@ function App() {
 
     const handleInputOnChange = (name: string, event: ChangeEvent<HTMLInputElement>) => {
         setInputData({...inputData, [name]: event.target.value});
+    };
+
+    useEffect(() => {
+        const fetchAgeCategories = async () => {
+            try {
+                const enterpriseId = selectedEnterpriseId; // Use the currently selected enterpriseId
+                const response = await fetchEnterpriseConfiguration(enterpriseId);
+                setAgeCategoryIds(response.AgeCategories.map(category => category.Id)); 
+            } catch (error) {
+                console.error('Error fetching Age Category IDs:', error);
+            }
+        };
+        
+        fetchAgeCategories();
+    }, [selectedEnterpriseId]);
+    
+
+    const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedAgeCategoryId(event.target.value);
     };
 
     const handleOnDateChange = (name: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,8 +140,8 @@ function App() {
                 StartUtc: startMoment.toISOString(),
                 EndUtc: endMoment.toISOString(),
                 OccupancyData:[{
-                    'AgeCategoryId':'16e8a466-729e-4d32-a221-ade300e410a8',
-                    'PersonCount':1
+                    'AgeCategoryId': selectedAgeCategoryId,
+                    'PersonCount':1,
                 }],
                 ProductIds: [],
                 RateId: 'fd666d4c-1472-4a61-b490-aeda00cd7e3a',
@@ -172,7 +193,6 @@ function App() {
 
     // Define/fetch list of Enterprises - their Id, timezone
 
-    // v1/configurations/get - gives us ageCategories, IanaTimeZoneIdentifier,, OccupancyData
     // -resourceCategories/getAll - spaceCategoryId,
     //  services/getPricing - rateId,
 
@@ -202,6 +222,14 @@ function App() {
                         <option value="8a51f050-8467-4e92-84d5-abc800c810b8">Bespin</option>
                         <option value="dab943a7-7f00-4656-b383-ae5a01007136">Mews Guest Journey Hotel</option>
                         <option value="5565d322-2505-4450-8284-aca8016c4844">Chicago UTC</option>
+                    </select>
+                </label>
+                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                Age Category:
+                    <select className="uniform-width" value={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange}>
+                        {ageCategoryIds.map(id => (
+                            <option key={id} value={id}>{id}</option>
+                        ))}
                     </select>
                 </label>
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>

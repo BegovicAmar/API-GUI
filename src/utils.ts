@@ -12,7 +12,6 @@ export const getEndDateFromStartDate = (getTodaysDate: string | number | Date) =
     return date.toISOString().split('T')[0];
 };
 
-
 export const generateRandomLastName = () => faker.person.lastName();
 
 export const generateShortLastName = (): string => {
@@ -22,9 +21,9 @@ export const generateShortLastName = (): string => {
     }
     return lastName;
 };
+
 export const generateRandomEmail = (lastName: string) => {
     const domains = ['gmail.com', 'yahoo.com', 'outlook.com'];
     const domain = domains[Math.floor(Math.random() * domains.length)];
     return `${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@${domain}`;
 };
-
