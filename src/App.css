@@ -142,4 +142,6 @@ button.uniform-width {
 
 .qr-wrapper {
   cursor: pointer; /* to indicate clickable */
+  padding: 15px; 
+  background-color: white; 
 }
