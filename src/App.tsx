@@ -12,7 +12,7 @@ import {
 import clsx from 'clsx';
 import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
-import loader from './components/loader';
+import LoaderComponent from './components/LoaderComponent';
 import moment from 'moment-timezone';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
@@ -62,6 +62,7 @@ const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupC
 };
 
 function App() {
+    const [isLoading, setIsLoading] = useState(false);
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -133,20 +134,20 @@ function App() {
         }
     };
     const createReservation = async ({ageCategoryId, resourceCategoryId}: CreateReservationOptions) => {
-        loader.show();
         setErrorMessage(null);
         setReservationDetails(null);
+        setIsLoading(true);
         try {
             const selectedEnterprise = configurationData?.Enterprises?.find(
                 enterprise => enterprise.Id === selectedEnterpriseId
             );
             const selectedConfiguration = configurationData?.BookingEngines?.[0];
-
+        
             const timezone = selectedEnterprise?.IanaTimeZoneIdentifier;
 
             if (!timezone || selectedConfiguration?.Id == null) {
                 console.error('Timezone or configurationId is missing');
-                loader.hide();
+                setIsLoading(false);
                 return;
             }
 
@@ -178,7 +179,7 @@ function App() {
             const responseJson = await fetchCreateReservation(newPayload);
             if (!isSuccessfulReservationGroupResponse(responseJson)) {
                 setErrorMessage(responseJson.Message);
-                loader.hide();
+                setIsLoading(false);
                 return;
             }
 
@@ -200,8 +201,9 @@ function App() {
             setReservationDetails(enhancedResponse);
         } catch (err) {
             console.error(err, 'CATCH');
+        } finally {
+            setIsLoading(false);
         }
-        loader.hide();
     };
 
 
@@ -215,9 +217,6 @@ function App() {
         }));
     }
 
-    // Define/fetch list of Enterprises - their Id, timezone
-
-    // -resourceCategories/getAll - spaceCategoryId,
     //  services/getPricing - rateId,
 
     const jsonData = getReservationData(reservationDetails);
@@ -231,91 +230,94 @@ function App() {
     const handleResourceCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedResourceCategoryId(event.target.value);
     };
-    if (selectedAgeCategoryId == null || selectedResourceCategoryId == null) {
-        return (
-            <p>
-                Loader...
-            </p>
-        );
-    }
     return (
         <div className={clsx('App', {dark: mode === 'dark'})}>
-            <div className="dark-mode-toggle-button">
-                <DarkModeToggle
-                    mode={mode}
-                    dark="Dark"
-                    light="Light"
-                    size="sm"
-                    onChange={(mode) => {
-                        setMode(mode);
-                        window.localStorage.setItem('themeMode', mode);
-                    }}
-                />
-            </div>
-            <div className="center-content">
-                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    Enterprise:
-                    <select className="uniform-width" onChange={handleSelectEnterprise} value={selectedEnterpriseId}>
-                        <option value="8a51f050-8467-4e92-84d5-abc800c810b8">Bespin</option>
-                        <option value="dab943a7-7f00-4656-b383-ae5a01007136">Mews Guest Journey Hotel</option>
-                        <option value="5565d322-2505-4450-8284-aca8016c4844">Chicago UTC</option>
-                    </select>
-                </label>
-                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-        Resource Category:
-                    <select
-                        className="uniform-width"
-                        value={selectedResourceCategoryId}
-                        onChange={handleResourceCategoryIdChange}
-                    >
-                        {resourceCategories.map(({Id,Name}) => (
-                            <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
-                        ))}
-                    </select>
-                </label>
-                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                Age Category:
-                    <select className="uniform-width" value={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange}>
-                        {ageCategories.map(({Id,Name}) => (
-                            <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
-                        ))}
-                    </select>
-                </label>
-                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
-                    LastName:
-                    <input className="uniform-width" type="text" value={lastName} onChange={(event) => {
-                        setLastName(event.target.value);
-                        handleInputOnChange('lastName', event);
-                    }}/>
-                </label>
-                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    Email:
-                    <input className="uniform-width" type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>
-                </label>
-                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    StartUtc:
-                    <input className="uniform-width" type="date" value={inputData.startUtc} onChange={(event) => handleOnDateChange('startUtc', event)}/>
-                </label>
-                <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    EndUtc:
-                    <input className="uniform-width" type="date" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)}/>
-                </label>
-                <button className="uniform-width" onClick={() => createReservation({ageCategoryId: selectedAgeCategoryId, resourceCategoryId: selectedResourceCategoryId})}>Create reservation</button>
-            </div>
-            {errorMessage ? (
-                <span className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>{errorMessage}</span>
-            ): null}
-            <div style={{fontSize: '20px', marginTop: '2rem'}}
-                className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                {reservationDetails === null ? 'No reservation fetched' : (renderReservations(reservationDetails))}
-            </div>
-            {jsonData && (
-                <div className={isQRZoomed ? 'qr-zoomed-container' : ''} onClick={() => setQRZoomed(!isQRZoomed)}>
-                    <div className="qr-wrapper" style={{transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)', transition: 'transform 0.3s'}}>
-                        <QRCode value={jsonData}/>
+            {isLoading && <LoaderComponent type="reservation" />}
+            { (selectedAgeCategoryId == null || selectedResourceCategoryId == null) ? (
+                <LoaderComponent type="configuration" />
+            ) : (
+                <>
+                    <div className="dark-mode-toggle-button">
+                        <DarkModeToggle
+                            mode={mode}
+                            dark="Dark"
+                            light="Light"
+                            size="sm"
+                            onChange={(mode) => {
+                                setMode(mode);
+                                window.localStorage.setItem('themeMode', mode);
+                            }}
+                        />
                     </div>
-                </div>
+                    <div className="center-content">
+                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                    Enterprise:
+                            <select className="uniform-width" onChange={handleSelectEnterprise} value={selectedEnterpriseId}>
+                                <option value="8a51f050-8467-4e92-84d5-abc800c810b8">Bespin</option>
+                                <option value="dab943a7-7f00-4656-b383-ae5a01007136">Mews Guest Journey Hotel</option>
+                                <option value="5565d322-2505-4450-8284-aca8016c4844">Chicago UTC</option>
+                            </select>
+                        </label>
+                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+        Resource Category:
+                            <select
+                                className="uniform-width"
+                                value={selectedResourceCategoryId}
+                                onChange={handleResourceCategoryIdChange}
+                            >
+                                {resourceCategories.map(({Id,Name}) => (
+                                    <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                Age Category:
+                            <select className="uniform-width" value={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange}>
+                                {ageCategories.map(({Id,Name}) => (
+                                    <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
+                                ))}
+                            </select>
+                        </label>
+                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                            <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
+                    LastName:
+                            <input className="uniform-width" type="text" value={lastName} onChange={(event) => {
+                                setLastName(event.target.value);
+                                handleInputOnChange('lastName', event);
+                            }}/>
+                        </label>
+                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                    Email:
+                            <input className="uniform-width" type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>
+                        </label>
+                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                    StartUtc:
+                            <input className="uniform-width" type="date" value={inputData.startUtc} onChange={(event) => handleOnDateChange('startUtc', event)}/>
+                        </label>
+                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                    EndUtc:
+                            <input className="uniform-width" type="date" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)}/>
+                        </label>
+                        <button className="uniform-width" onClick={() => createReservation({ageCategoryId: selectedAgeCategoryId, resourceCategoryId: selectedResourceCategoryId})}>Create reservation</button>
+                    </div>
+                    {errorMessage && (
+                        <div className={clsx('error-container', { 'dark-error': mode === 'dark', 'light-error': mode === 'light' })}>
+                            <span className="error-icon">⚠️</span> {/* You can replace with an actual error icon if you have one */}
+                            {errorMessage}
+                        </div>
+                    )}
+                    <div style={{fontSize: '20px', marginTop: '2rem'}}
+                        className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                        {reservationDetails === null ? 'No reservation fetched' : (renderReservations(reservationDetails))}
+                    </div>
+                    {jsonData && (
+                        <div className={isQRZoomed ? 'qr-zoomed-container' : ''} onClick={() => setQRZoomed(!isQRZoomed)}>
+                            <div className="qr-wrapper" style={{transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)', transition: 'transform 0.3s'}}>
+                                <QRCode value={jsonData}/>
+                            </div>
+                        </div>
+                    )}
+                </>
             )}
         </div>
 

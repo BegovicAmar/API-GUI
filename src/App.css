@@ -145,3 +145,26 @@ button.uniform-width {
   padding: 15px; 
   background-color: white; 
 }
+
+.error-container {
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;  /* Spacing between icon and text */
+}
+
+.error-icon {
+  font-size: 20px;  /* Adjust as needed */
+}
+
+.dark-error {
+  background-color: #D32F2F;  /* Dark mode error background */
+  color: white;
+}
+
+.light-error {
+  background-color: #FFCDD2;  /* Light mode error background */
+  color: #D32F2F;
+}
