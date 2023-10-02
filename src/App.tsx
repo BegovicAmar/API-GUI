@@ -1,14 +1,13 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import './App.css';
-import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
+import { generateRandomEmail, generateShortLastName, getDefaultLanguageTextOrFallback, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
     ConfigurationGetResponse, CreateReservationGroupPayload,
     createSingleReservation,
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
-    fetchResourceCategoryId,
-    ResourceCategoryPayload,
-    ReservationsGroupCreateResponse
+    fetchResourceCategories,
+    ReservationsGroupCreateResponse, AgeCategory, ResourceCategory, isSuccessfulReservationGroupResponse
 } from './api';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
@@ -44,6 +43,11 @@ const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupC
     );
 };
 
+interface CreateReservationOptions {
+    ageCategoryId: string;
+    resourceCategoryId: string;
+}
+
 const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse | null) => {
     if (!reservationsGroupCreateResponse) return null;
 
@@ -60,11 +64,12 @@ const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupC
 function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
-    const [ageCategoryIds, setAgeCategoryIds] = useState<string[]>([]);
-    const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string>('');
-    const [resourceCategoryIds, setResourceCategoryIds] = useState<string[]>([]);
-    const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string>('');
+    const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
+    const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string | null>(null);
+    const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>([]);
+    const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string | null>(null);
     const [lastName, setLastName] = useState<string>(randomLastName);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
@@ -75,35 +80,38 @@ function App() {
     });
 
     useEffect(() => {
-        fetchEnterpriseConfiguration(selectedEnterpriseId).then(response => {
-            setConfigurationData(response);
-        });
+
+        try {
+            const configDataPromise = fetchEnterpriseConfiguration(selectedEnterpriseId);
+            configDataPromise.then((configData) => {
+                setConfigurationData(configData);
+                setAgeCategories(configData.AgeCategories);
+                if (configData.AgeCategories.length > 0) {
+                    setSelectedAgeCategoryId(configData.AgeCategories[0].Id);
+                }
+                if (configData?.BookingEngines?.[0]) {
+                    const serviceId = configData?.BookingEngines?.[0].ServiceId;
+                    const resourceCategoryPromise = fetchResourceCategories({ServiceId: serviceId});
+                    resourceCategoryPromise.then((resourceCategoryResponse) => {
+                        setResourceCategories(resourceCategoryResponse.ResourceCategories);
+                        if (resourceCategoryResponse.ResourceCategories.length > 0) {
+                            setSelectedResourceCategoryId(resourceCategoryResponse.ResourceCategories[0].Id);
+                        }
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching data', error);
+        }
+
     }, [selectedEnterpriseId]);
+
 
     const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
 
     const handleInputOnChange = (name: string, event: ChangeEvent<HTMLInputElement>) => {
         setInputData({...inputData, [name]: event.target.value});
     };
-
-    useEffect(() => {
-        const fetchAgeCategories = async () => {
-            try {
-                const enterpriseId = selectedEnterpriseId; 
-                const response = await fetchEnterpriseConfiguration(enterpriseId);
-                setAgeCategoryIds(response.AgeCategories.map(category => category.Id)); 
-                if (response.AgeCategories.length > 0) {
-                    setSelectedAgeCategoryId(response.AgeCategories[0].Id);
-                }
-            } catch (error) {
-                console.error('Error fetching Age Category IDs:', error);
-            }
-        };
-        
-        fetchAgeCategories();
-    }, [selectedEnterpriseId]);
-    
-    
 
     const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(event.target.value);
@@ -124,37 +132,10 @@ function App() {
             });
         }
     };
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const configData = await fetchEnterpriseConfiguration(selectedEnterpriseId);
-                setConfigurationData(configData);
-                
-                const fetchedResourceCategoryIds: string[] = [];
-                if (configData?.BookingEngines) {
-                    for (const bookingEngine of configData.BookingEngines) {
-                        const serviceId = bookingEngine.ServiceId;
-                        const payload: ResourceCategoryPayload = { ServiceId: serviceId };
-                        const resourceCategoryResponse = await fetchResourceCategoryId(payload);
-                        resourceCategoryResponse.ResourceCategories.forEach(category => {
-                            fetchedResourceCategoryIds.push(category.Id);
-                        });
-                    }
-                    setResourceCategoryIds(fetchedResourceCategoryIds);
-                    if (fetchedResourceCategoryIds.length > 0) {
-                        setSelectedResourceCategoryId(fetchedResourceCategoryIds[0]);
-                    }
-                }
-            } catch (error) {
-                console.error('Error fetching data', error);
-            }
-        };
-    
-        fetchData();
-    }, [selectedEnterpriseId]);
-
-    const createReservation = async () => {
+    const createReservation = async ({ageCategoryId, resourceCategoryId}: CreateReservationOptions) => {
         loader.show();
+        setErrorMessage(null);
+        setReservationDetails(null);
         try {
             const selectedEnterprise = configurationData?.Enterprises?.find(
                 enterprise => enterprise.Id === selectedEnterpriseId
@@ -177,12 +158,12 @@ function App() {
                 StartUtc: startMoment.toISOString(),
                 EndUtc: endMoment.toISOString(),
                 OccupancyData:[{
-                    'AgeCategoryId': selectedAgeCategoryId,
+                    'AgeCategoryId':ageCategoryId,
                     'PersonCount':1,
                 }],
                 ProductIds: [],
                 RateId: 'fd666d4c-1472-4a61-b490-aeda00cd7e3a',
-                RoomCategoryId: selectedResourceCategoryId,
+                RoomCategoryId: resourceCategoryId,
                 Notes: null,
             });
 
@@ -195,6 +176,12 @@ function App() {
             };
 
             const responseJson = await fetchCreateReservation(newPayload);
+            if (!isSuccessfulReservationGroupResponse(responseJson)) {
+                setErrorMessage(responseJson.Message);
+                loader.hide();
+                return;
+            }
+
             const enhancedReservations = responseJson.Reservations.map((reservation) => ({
                 ...reservation,
                 LastName: lastName
@@ -236,12 +223,21 @@ function App() {
     const jsonData = getReservationData(reservationDetails);
     const [isQRZoomed, setQRZoomed] = useState(false);
     const handleSelectEnterprise = async (event: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedAgeCategoryId(null);
+        setSelectedResourceCategoryId(null);
         selectEnterprise(event.target.value);
     };
 
     const handleResourceCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedResourceCategoryId(event.target.value);
     };
+    if (selectedAgeCategoryId == null || selectedResourceCategoryId == null) {
+        return (
+            <p>
+                Loader...
+            </p>
+        );
+    }
     return (
         <div className={clsx('App', {dark: mode === 'dark'})}>
             <div className="dark-mode-toggle-button">
@@ -267,21 +263,21 @@ function App() {
                 </label>
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
         Resource Category:
-                    <select 
-                        className="uniform-width" 
-                        value={selectedResourceCategoryId} 
+                    <select
+                        className="uniform-width"
+                        value={selectedResourceCategoryId}
                         onChange={handleResourceCategoryIdChange}
                     >
-                        {resourceCategoryIds.map(id => (
-                            <option key={id} value={id}>{id}</option>
+                        {resourceCategories.map(({Id,Name}) => (
+                            <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
                         ))}
                     </select>
                 </label>
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                 Age Category:
                     <select className="uniform-width" value={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange}>
-                        {ageCategoryIds.map(id => (
-                            <option key={id} value={id}>{id}</option>
+                        {ageCategories.map(({Id,Name}) => (
+                            <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
                         ))}
                     </select>
                 </label>
@@ -305,8 +301,11 @@ function App() {
                     EndUtc:
                     <input className="uniform-width" type="date" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)}/>
                 </label>
-                <button className="uniform-width" onClick={createReservation}>Create reservation</button>
+                <button className="uniform-width" onClick={() => createReservation({ageCategoryId: selectedAgeCategoryId, resourceCategoryId: selectedResourceCategoryId})}>Create reservation</button>
             </div>
+            {errorMessage ? (
+                <span className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>{errorMessage}</span>
+            ): null}
             <div style={{fontSize: '20px', marginTop: '2rem'}}
                 className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                 {reservationDetails === null ? 'No reservation fetched' : (renderReservations(reservationDetails))}
