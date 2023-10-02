@@ -117,7 +117,7 @@ export interface ResourceCategoryPayload {
     ServiceId: string;
 }
 
-interface ResourceCategory {
+export interface ResourceCategory {
     Id: string;
     Name: Record<string, string>;
     ServiceId: string;
@@ -127,6 +127,6 @@ interface ResourceCategoryResponse {
     ResourceCategories: Array<ResourceCategory>;
 }
 
-export const fetchResourceCategoryId = async (payload: ResourceCategoryPayload): Promise<ResourceCategoryResponse> => {
+export const fetchResourceCategories = async (payload: ResourceCategoryPayload): Promise<ResourceCategoryResponse> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/resourceCategories/getAll`, payload);
 };
