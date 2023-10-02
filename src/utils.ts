@@ -27,3 +27,13 @@ export const generateRandomEmail = (lastName: string) => {
     const domain = domains[Math.floor(Math.random() * domains.length)];
     return `${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@${domain}`;
 };
+const DEFAULT_LANGUAGE_CODE = 'en-US';
+
+export const getDefaultLanguageTextOrFallback = (localizedPropery: Record<string,string>) => {
+    if (localizedPropery[DEFAULT_LANGUAGE_CODE] != null) {
+        return localizedPropery[DEFAULT_LANGUAGE_CODE];
+    }
+    const allLanguages = Object.keys(localizedPropery);
+    return localizedPropery[allLanguages?.[0]];
+
+};

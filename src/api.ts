@@ -90,11 +90,12 @@ interface BookingEngine {
     Id: string;
     ServiceId: string;
 }
-interface AgeCategory {
+export interface AgeCategory {
     Id: string;
     ServiceId: string;
     Classification: 'Adult' | 'Child';
     IsDefault: boolean;
+    Name: Record<string, string>
 }
 
 export interface ConfigurationGetResponse {

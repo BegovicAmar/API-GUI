@@ -1,6 +1,6 @@
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import './App.css';
-import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
+import { generateRandomEmail, generateShortLastName, getDefaultLanguageTextOrFallback, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
     ConfigurationGetResponse, CreateReservationGroupPayload,
     createSingleReservation,
@@ -8,7 +8,7 @@ import {
     fetchEnterpriseConfiguration,
     fetchResourceCategoryId,
     ResourceCategoryPayload,
-    ReservationsGroupCreateResponse
+    ReservationsGroupCreateResponse, AgeCategory
 } from './api';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
@@ -61,7 +61,7 @@ function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
     const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
-    const [ageCategoryIds, setAgeCategoryIds] = useState<string[]>([]);
+    const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
     const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string>('');
     const [resourceCategoryIds, setResourceCategoryIds] = useState<string[]>([]);
     const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string>('');
@@ -86,24 +86,24 @@ function App() {
         setInputData({...inputData, [name]: event.target.value});
     };
 
-    useEffect(() => {
-        const fetchAgeCategories = async () => {
-            try {
-                const enterpriseId = selectedEnterpriseId; 
-                const response = await fetchEnterpriseConfiguration(enterpriseId);
-                setAgeCategoryIds(response.AgeCategories.map(category => category.Id)); 
-                if (response.AgeCategories.length > 0) {
-                    setSelectedAgeCategoryId(response.AgeCategories[0].Id);
-                }
-            } catch (error) {
-                console.error('Error fetching Age Category IDs:', error);
-            }
-        };
-        
-        fetchAgeCategories();
-    }, [selectedEnterpriseId]);
-    
-    
+    // useEffect(() => {
+    //     const fetchAgeCategories = async () => {
+    //         try {
+    //             const enterpriseId = selectedEnterpriseId;
+    //             const response = await fetchEnterpriseConfiguration(enterpriseId);
+    //             setAgeCategories(response.AgeCategories.map(category => category.Id));
+    //             if (response.AgeCategories.length > 0) {
+    //                 setSelectedAgeCategoryId(response.AgeCategories[0].Id);
+    //             }
+    //         } catch (error) {
+    //             console.error('Error fetching Age Category IDs:', error);
+    //         }
+    //     };
+    //
+    //     fetchAgeCategories();
+    // }, [selectedEnterpriseId]);
+
+
 
     const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(event.target.value);
@@ -129,7 +129,7 @@ function App() {
             try {
                 const configData = await fetchEnterpriseConfiguration(selectedEnterpriseId);
                 setConfigurationData(configData);
-                
+
                 const fetchedResourceCategoryIds: string[] = [];
                 if (configData?.BookingEngines) {
                     for (const bookingEngine of configData.BookingEngines) {
@@ -145,11 +145,15 @@ function App() {
                         setSelectedResourceCategoryId(fetchedResourceCategoryIds[0]);
                     }
                 }
+                setAgeCategories(configData.AgeCategories);
+                if (configData.AgeCategories.length > 0) {
+                    setSelectedAgeCategoryId(configData.AgeCategories[0].Id); // TODO maybe bug
+                }
             } catch (error) {
                 console.error('Error fetching data', error);
             }
         };
-    
+
         fetchData();
     }, [selectedEnterpriseId]);
 
@@ -267,9 +271,9 @@ function App() {
                 </label>
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
         Resource Category:
-                    <select 
-                        className="uniform-width" 
-                        value={selectedResourceCategoryId} 
+                    <select
+                        className="uniform-width"
+                        value={selectedResourceCategoryId}
                         onChange={handleResourceCategoryIdChange}
                     >
                         {resourceCategoryIds.map(id => (
@@ -280,8 +284,8 @@ function App() {
                 <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                 Age Category:
                     <select className="uniform-width" value={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange}>
-                        {ageCategoryIds.map(id => (
-                            <option key={id} value={id}>{id}</option>
+                        {ageCategories.map(({Id,Name}) => (
+                            <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
                         ))}
                     </select>
                 </label>
