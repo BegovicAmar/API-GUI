@@ -17,6 +17,12 @@ export interface ReservationsGroupCreateResponse {
     Reservations: Array<ReservationResponse>;
 }
 
+interface FailedResponse {
+    DebugDetails: string | null;
+    Details: string | null;
+    Message: string;
+}
+
 interface AuthOptions {
     Session: string;
     Client: string;
@@ -69,7 +75,11 @@ export interface CreateReservationGroupPayload {
     PromotedServiceReservations?: Array<unknown>;
 }
 
-export const fetchCreateReservation = async (payload: CreateReservationGroupPayload): Promise<ReservationsGroupCreateResponse> => {
+export const isSuccessfulReservationGroupResponse = (response: ReservationsGroupCreateResponse | FailedResponse): response is ReservationsGroupCreateResponse => {
+    return 'Reservations' in response;
+};
+
+export const fetchCreateReservation = async (payload: CreateReservationGroupPayload): Promise<ReservationsGroupCreateResponse | FailedResponse> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/reservationGroups/create`, payload);
 };
 
@@ -90,11 +100,12 @@ interface BookingEngine {
     Id: string;
     ServiceId: string;
 }
-interface AgeCategory {
+export interface AgeCategory {
     Id: string;
     ServiceId: string;
     Classification: 'Adult' | 'Child';
     IsDefault: boolean;
+    Name: Record<string, string>
 }
 
 export interface ConfigurationGetResponse {
@@ -110,4 +121,22 @@ export const fetchConfiguration = async (payload: ConfigurationOption): Promise<
 
 export const fetchEnterpriseConfiguration = async (entepriseId: string) => {
     return fetchConfiguration({Ids:[entepriseId], PrimaryId: entepriseId});
+};
+
+export interface ResourceCategoryPayload {
+    ServiceId: string;
+}
+
+export interface ResourceCategory {
+    Id: string;
+    Name: Record<string, string>;
+    ServiceId: string;
+}
+
+interface ResourceCategoryResponse {
+    ResourceCategories: Array<ResourceCategory>;
+}
+
+export const fetchResourceCategories = async (payload: ResourceCategoryPayload): Promise<ResourceCategoryResponse> => {
+    return authCall(`${ENV_URL}/api/bookingEngine/v1/resourceCategories/getAll`, payload);
 };
