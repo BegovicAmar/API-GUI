@@ -7,7 +7,7 @@ import {
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
     fetchResourceCategories,
-    ReservationsGroupCreateResponse, AgeCategory, ResourceCategory
+    ReservationsGroupCreateResponse, AgeCategory, ResourceCategory, isSuccessfulReservationGroupResponse
 } from './api';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
@@ -64,6 +64,7 @@ const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupC
 function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
     const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
     const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string | null>(null);
@@ -133,6 +134,8 @@ function App() {
     };
     const createReservation = async ({ageCategoryId, resourceCategoryId}: CreateReservationOptions) => {
         loader.show();
+        setErrorMessage(null);
+        setReservationDetails(null);
         try {
             const selectedEnterprise = configurationData?.Enterprises?.find(
                 enterprise => enterprise.Id === selectedEnterpriseId
@@ -173,6 +176,12 @@ function App() {
             };
 
             const responseJson = await fetchCreateReservation(newPayload);
+            if (!isSuccessfulReservationGroupResponse(responseJson)) {
+                setErrorMessage(responseJson.Message);
+                loader.hide();
+                return;
+            }
+
             const enhancedReservations = responseJson.Reservations.map((reservation) => ({
                 ...reservation,
                 LastName: lastName
@@ -294,6 +303,9 @@ function App() {
                 </label>
                 <button className="uniform-width" onClick={() => createReservation({ageCategoryId: selectedAgeCategoryId, resourceCategoryId: selectedResourceCategoryId})}>Create reservation</button>
             </div>
+            {errorMessage ? (
+                <span className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>{errorMessage}</span>
+            ): null}
             <div style={{fontSize: '20px', marginTop: '2rem'}}
                 className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                 {reservationDetails === null ? 'No reservation fetched' : (renderReservations(reservationDetails))}

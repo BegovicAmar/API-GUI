@@ -17,6 +17,12 @@ export interface ReservationsGroupCreateResponse {
     Reservations: Array<ReservationResponse>;
 }
 
+interface FailedResponse {
+    DebugDetails: string | null;
+    Details: string | null;
+    Message: string;
+}
+
 interface AuthOptions {
     Session: string;
     Client: string;
@@ -69,7 +75,11 @@ export interface CreateReservationGroupPayload {
     PromotedServiceReservations?: Array<unknown>;
 }
 
-export const fetchCreateReservation = async (payload: CreateReservationGroupPayload): Promise<ReservationsGroupCreateResponse> => {
+export const isSuccessfulReservationGroupResponse = (response: ReservationsGroupCreateResponse | FailedResponse): response is ReservationsGroupCreateResponse => {
+    return 'Reservations' in response;
+};
+
+export const fetchCreateReservation = async (payload: CreateReservationGroupPayload): Promise<ReservationsGroupCreateResponse | FailedResponse> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/reservationGroups/create`, payload);
 };
 
