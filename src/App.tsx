@@ -214,6 +214,8 @@ function App() {
     const jsonData = getReservationData(reservationDetails);
     const [isQRZoomed, setQRZoomed] = useState(false);
     const handleSelectEnterprise = async (event: ChangeEvent<HTMLSelectElement>) => {
+        setSelectedAgeCategoryId(null);
+        setSelectedResourceCategoryId(null);
         selectEnterprise(event.target.value);
     };
 
