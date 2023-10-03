@@ -7,7 +7,7 @@ import {
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
     fetchResourceCategories,
-    ReservationsGroupCreateResponse, AgeCategory, ResourceCategory, isSuccessfulReservationGroupResponse
+    ReservationsGroupCreateResponse, AgeCategory, ResourceCategory, isSuccessfulReservationGroupResponse, Rate, fetchRateIds, RatePayload
 } from './api';
 import clsx from 'clsx';
 import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
@@ -72,6 +72,8 @@ function App() {
     const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>([]);
     const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string | null>(null);
     const [lastName, setLastName] = useState<string>(randomLastName);
+    const [rates, setRates] = useState<Rate[]>([]);
+    const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
         email: generateRandomEmail(randomLastName),
@@ -81,22 +83,45 @@ function App() {
     });
 
     useEffect(() => {
-
         try {
             const configDataPromise = fetchEnterpriseConfiguration(selectedEnterpriseId);
             configDataPromise.then((configData) => {
                 setConfigurationData(configData);
                 setAgeCategories(configData.AgeCategories);
+    
                 if (configData.AgeCategories.length > 0) {
                     setSelectedAgeCategoryId(configData.AgeCategories[0].Id);
                 }
+    
                 if (configData?.BookingEngines?.[0]) {
                     const serviceId = configData?.BookingEngines?.[0].ServiceId;
-                    const resourceCategoryPromise = fetchResourceCategories({ServiceId: serviceId});
+                    const bookingEngineId = configData?.BookingEngines?.[0].Id;
+    
+                    const resourceCategoryPromise = fetchResourceCategories({ ServiceId: serviceId });
                     resourceCategoryPromise.then((resourceCategoryResponse) => {
                         setResourceCategories(resourceCategoryResponse.ResourceCategories);
                         if (resourceCategoryResponse.ResourceCategories.length > 0) {
                             setSelectedResourceCategoryId(resourceCategoryResponse.ResourceCategories[0].Id);
+
+                            const timezone = configData?.Enterprises?.find(
+                                enterprise => enterprise.Id === selectedEnterpriseId
+                            )?.IanaTimeZoneIdentifier;
+    
+                            const startMoment = timezone ? moment.tz(`${inputData.startUtc}T00:00:00`, timezone).toISOString() : inputData.startUtc;
+                            const endMoment = timezone ? moment.tz(`${inputData.endUtc}T00:00:00`, timezone).toISOString() : inputData.endUtc;
+
+                            const ratePayload: RatePayload = {
+                                EnterpriseId: selectedEnterpriseId,
+                                ServiceId: serviceId,
+                                BookingEngineId: bookingEngineId,
+                                CategoryId: resourceCategoryResponse.ResourceCategories[0].Id,
+                                AgeCategoryId: configData.AgeCategories[0].Id,
+                                StartUtc: startMoment, 
+                                EndUtc: endMoment
+                            };
+                            fetchRateIds(ratePayload).then(rateResponse => {
+                                setRates(rateResponse.Rates);
+                            });
                         }
                     });
                 }
@@ -104,8 +129,8 @@ function App() {
         } catch (error) {
             console.error('Error fetching data', error);
         }
-
-    }, [selectedEnterpriseId]);
+        
+    }, [inputData.endUtc, inputData.startUtc, selectedEnterpriseId]);
 
 
     const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
@@ -116,6 +141,10 @@ function App() {
 
     const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(event.target.value);
+    };
+
+    const handleRateIdChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSelectedRateId(event.target.value);
     };
 
     const handleOnDateChange = (name: string, event: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,6 +183,8 @@ function App() {
             const startMoment = moment.tz(`${inputData.startUtc}T00:00:00`, timezone);
             const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
 
+            const rateId = selectedRateId || (rates.length > 0 ? rates[0].Id : 'fd666d4c-1472-4a61-b490-aeda00cd7e3a');
+            
             const reservation = createSingleReservation({
                 Identifier: Math.random().toString(),
                 StartUtc: startMoment.toISOString(),
@@ -163,7 +194,7 @@ function App() {
                     'PersonCount':1,
                 }],
                 ProductIds: [],
-                RateId: 'fd666d4c-1472-4a61-b490-aeda00cd7e3a',
+                RateId: rateId,
                 RoomCategoryId: resourceCategoryId,
                 Notes: null,
             });
@@ -278,6 +309,15 @@ function App() {
                                 ))}
                             </select>
                         </label>
+                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                 Rate:
+                            <select className="uniform-width" value={selectedRateId ?? ''} onChange={handleRateIdChange}>
+                                {rates.map(({Id,Name}) => (
+                                    <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
+                                ))}
+                            </select>
+                        </label>
+
                         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                             <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
                     LastName:
