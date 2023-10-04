@@ -38,12 +38,23 @@ const authProps: AuthOptions = {
 const ENV_URL = 'https://gx.mews-develop.com';
 
 const authCall = async <T>(endpoint: string, payload: T) => {
-    const reposnseMeta = await fetch(endpoint, {
+    const responseMeta = await fetch(endpoint, {
         method: 'POST',
         body: JSON.stringify({...authProps, ...payload})
-    },);
-    return await reposnseMeta.json();
+    });
+
+    if (!responseMeta.ok) {
+        throw new Error(`API returned status code ${responseMeta.status}`);
+    }
+
+    try {
+        return await responseMeta.json();
+    } catch (error) {
+        // If there's an error parsing the JSON, throw a more descriptive error
+        throw new Error('Invalid JSON received.');
+    }
 };
+
 
 interface CreditCardData {
     PaymentGatewayData: string | null;

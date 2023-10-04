@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import './App.css';
 import { generateRandomEmail, generateShortLastName, getDefaultLanguageTextOrFallback, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
@@ -73,6 +73,16 @@ function App() {
     const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string | null>(null);
     const [lastName, setLastName] = useState<string>(randomLastName);
     const [rates, setRates] = useState<Rate[]>([]);
+    const [validationError, setValidationError] = useState<string | null>(null);
+    const [showHiddenFields, setShowHiddenFields] = useState(false);
+    const enterpriseIDRef = useRef<HTMLInputElement>(null);
+    const enterpriseNameRef = useRef<HTMLInputElement>(null);    
+    const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+    const [enterprises, setEnterprises] = useState([
+        { id: '8a51f050-8467-4e92-84d5-abc800c810b8', name: 'Bespin' },
+        { id: 'dab943a7-7f00-4656-b383-ae5a01007136', name: 'Mews Guest Journey Hotel' },
+        { id: '5565d322-2505-4450-8284-aca8016c4844', name: 'Chicago UTC' },
+    ]);    
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
@@ -89,8 +99,8 @@ function App() {
                 setConfigurationData(configData);
                 setAgeCategories(configData.AgeCategories);
     
-                if (configData.AgeCategories.length > 0) {
-                    setSelectedAgeCategoryId(configData.AgeCategories[0].Id);
+                if (!selectedAgeCategoryId || !configData.AgeCategories.find(cat => cat.Id === selectedAgeCategoryId)) {
+                    setSelectedAgeCategoryId(configData.AgeCategories[0]?.Id || null);
                 }
     
                 if (configData?.BookingEngines?.[0]) {
@@ -130,7 +140,7 @@ function App() {
             console.error('Error fetching data', error);
         }
         
-    }, [inputData.endUtc, inputData.startUtc, selectedEnterpriseId]);
+    }, [inputData.endUtc, inputData.startUtc, selectedAgeCategoryId, selectedEnterpriseId]);
 
 
     const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
@@ -248,7 +258,60 @@ function App() {
         }));
     }
 
-    //  services/getPricing - rateId,
+    
+    const addEnterpriseToDropdown = async () => {
+        const idValue = enterpriseIDRef.current?.value;
+        const nameValue = enterpriseNameRef.current?.value;
+    
+        if (idValue && nameValue) {
+            try {
+                await fetchEnterpriseConfiguration(idValue);
+                
+                setEnterprises((prevEnterprises) => [
+                    ...prevEnterprises,
+                    { id: idValue, name: nameValue },
+                ]);
+                setSuccessMessage('Enterprise added successfully');
+                setTimeout(() => {
+                    setSuccessMessage(null);
+                }, 5000);  // Clear the message after 3 seconds
+                
+                // Clear the input fields
+                enterpriseIDRef.current.value = '';
+                enterpriseNameRef.current.value = '';
+            } catch (error) {
+                // Only enters this block if fetchEnterpriseConfiguration throws an error (e.g., due to a 400 status code)
+                console.error('Error validating EnterpriseID:', error);
+                setValidationError('Invalid EnterpriseID.'); 
+            }
+        }
+    };
+    
+
+
+    useEffect(() => {
+        let timer: ReturnType<typeof setTimeout>;
+        if (validationError) {
+            timer = setTimeout(() => {
+                setValidationError(null);
+            }, 5000);
+        }
+
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [validationError]);
+    useEffect(() => {
+        let timer: ReturnType<typeof setTimeout>;
+        if (errorMessage) {
+            timer = setTimeout(() => {
+                setErrorMessage(null);
+            }, 10000);
+        }
+        return () => {
+            if (timer) clearTimeout(timer);
+        };
+    }, [errorMessage]);
 
     const jsonData = getReservationData(reservationDetails);
     const [isQRZoomed, setQRZoomed] = useState(false);
@@ -280,15 +343,53 @@ function App() {
                             }}
                         />
                     </div>
+                    <div className="fields-wrapper">
+                        <button onClick={() => setShowHiddenFields(!showHiddenFields)}>
+                        Add Enterprise
+                        </button>
+                        <div className="center-content">
+                            {showHiddenFields && (
+                                <>
+                                    <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                                EnterpriseID:
+                                        <input className="uniform-width" type="text" ref={enterpriseIDRef} />
+                                    </label>
+                                    <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                                EnterpriseName:
+                                        <input className="uniform-width" type="text" ref={enterpriseNameRef} />
+                                    </label>
+                                    <button onClick={addEnterpriseToDropdown}>Submit</button>
+                                    {validationError && (
+                                        <div className={clsx('error-container', { 'dark-error': mode === 'dark', 'light-error': mode === 'light' })}>
+                                            <span className="error-icon">⚠️</span>{validationError}
+                                        </div>
+                                    )}
+                                    {successMessage && (
+                                        <div className={clsx(
+                                            'success-container', 
+                                            { 'dark-success': mode === 'dark', 'light-success': mode === 'light' } // Conditional classes
+                                        )}>
+                                            <span className="success-icon">✅</span> {/* Display a checkmark as a success icon */}
+                                            {successMessage}
+                                        </div>
+                                    )}
+                                </>
+                            )}
+                        </div>
+                    </div>
+
                     <div className="center-content">
                         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                     Enterprise:
                             <select className="uniform-width" onChange={handleSelectEnterprise} value={selectedEnterpriseId}>
-                                <option value="8a51f050-8467-4e92-84d5-abc800c810b8">Bespin</option>
-                                <option value="dab943a7-7f00-4656-b383-ae5a01007136">Mews Guest Journey Hotel</option>
-                                <option value="5565d322-2505-4450-8284-aca8016c4844">Chicago UTC</option>
+                                {enterprises.map((enterprise) => (
+                                    <option key={enterprise.id} value={enterprise.id}>
+                                        {enterprise.name}
+                                    </option>
+                                ))}
                             </select>
                         </label>
+
                         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
         Resource Category:
                             <select
