@@ -142,4 +142,60 @@ button.uniform-width {
 
 .qr-wrapper {
   cursor: pointer; /* to indicate clickable */
+  padding: 15px; 
+  background-color: white; 
+}
+
+.error-container {
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;  /* Spacing between icon and text */
+}
+
+.error-icon {
+  font-size: 20px;  /* Adjust as needed */
+}
+
+.dark-error {
+  background-color: #D32F2F;  /* Dark mode error background */
+  color: white;
+}
+
+.light-error {
+  background-color: #FFCDD2;  /* Light mode error background */
+  color: #D32F2F;
+}
+
+.success-container {
+  background-color: #e6ffe6; /* Default light green background */
+  border: 1px solid #00cc00; /* Default green border */
+  padding: 10px;
+  border-radius: 5px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+}
+
+.dark-success {
+  background-color: #003300; /* Dark green background for dark mode */
+  color: #00cc00; /* Green text for dark mode */
+}
+
+.light-success {
+  background-color: #e6ffe6; /* Light green background for light mode */
+  color: #003300; /* Dark green text for light mode */
+}
+
+.success-icon {
+  margin-right: 10px;
+}
+
+.fields-wrapper {
+  position: absolute;
+  top: 10px;   
+  right: 10px; 
+  z-index: 10; 
 }

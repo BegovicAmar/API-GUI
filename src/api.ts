@@ -26,22 +26,35 @@ interface FailedResponse {
 interface AuthOptions {
     Session: string;
     Client: string;
+    CurrencyCode: string;
 }
 
 const authProps: AuthOptions = {
     Session: '09809905205405004804809705004805005104504805704504905008404805505804805705805304809032AC2453BCF3B25E69D103EF54026E4C',
-    Client: 'Mews Distributor 1821.0.0'
+    Client: 'Mews Distributor 1821.0.0',
+    CurrencyCode: 'EUR'
 };
 
 const ENV_URL = 'https://gx.mews-develop.com';
 
 const authCall = async <T>(endpoint: string, payload: T) => {
-    const reposnseMeta = await fetch(endpoint, {
+    const responseMeta = await fetch(endpoint, {
         method: 'POST',
         body: JSON.stringify({...authProps, ...payload})
-    },);
-    return await reposnseMeta.json();
+    });
+
+    if (!responseMeta.ok) {
+        throw new Error(`API returned status code ${responseMeta.status}`);
+    }
+
+    try {
+        return await responseMeta.json();
+    } catch (error) {
+        // If there's an error parsing the JSON, throw a more descriptive error
+        throw new Error('Invalid JSON received.');
+    }
 };
+
 
 interface CreditCardData {
     PaymentGatewayData: string | null;
@@ -139,4 +152,28 @@ interface ResourceCategoryResponse {
 
 export const fetchResourceCategories = async (payload: ResourceCategoryPayload): Promise<ResourceCategoryResponse> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/resourceCategories/getAll`, payload);
+};
+
+
+export interface RatePayload {
+    EnterpriseId: string;
+    ServiceId: string;
+    BookingEngineId: string;
+    CategoryId: string;
+    AgeCategoryId: string;
+    StartUtc: string;
+    EndUtc: string;
+}
+
+export interface Rate {
+    Id: string;
+    Name: Record<string, string>;
+}
+
+interface RateResponse {
+    Rates: Array<Rate>;
+}
+
+export const fetchRateIds = async (payload: RatePayload): Promise<RateResponse> => {
+    return authCall(`${ENV_URL}/api/bookingEngine/v1/services/getPricing`, payload);
 };
