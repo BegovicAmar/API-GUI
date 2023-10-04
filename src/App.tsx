@@ -43,10 +43,12 @@ const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupC
     );
 };
 
-interface CreateReservationOptions {
+type CreateReservationOptions = {
     ageCategoryId: string;
     resourceCategoryId: string;
-}
+    email?: string;
+    lastName?: string;
+};
 
 const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse | null) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -66,6 +68,7 @@ function App() {
     const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [validationError, setValidationError] = useState<string | null>(null);
     const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
     const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
     const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string | null>(null);
@@ -73,10 +76,10 @@ function App() {
     const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string | null>(null);
     const [lastName, setLastName] = useState<string>(randomLastName);
     const [rates, setRates] = useState<Rate[]>([]);
-    const [validationError, setValidationError] = useState<string | null>(null);
     const [showHiddenFields, setShowHiddenFields] = useState(false);
     const enterpriseIDRef = useRef<HTMLInputElement>(null);
     const enterpriseNameRef = useRef<HTMLInputElement>(null);    
+    const [numReservations, setNumReservations] = useState<number>(1);
     const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
     const [enterprises, setEnterprises] = useState([
         { id: '8a51f050-8467-4e92-84d5-abc800c810b8', name: 'Bespin' },
@@ -172,10 +175,13 @@ function App() {
             });
         }
     };
-    const createReservation = async ({ageCategoryId, resourceCategoryId}: CreateReservationOptions) => {
+    const createReservation = async ({ageCategoryId, resourceCategoryId, email, lastName}: CreateReservationOptions) => {
         setErrorMessage(null);
         setReservationDetails(null);
         setIsLoading(true);
+        
+        const reservationEmail = email || inputData.email;
+        const reservationLastName = lastName || inputData.lastName;
         try {
             const selectedEnterprise = configurationData?.Enterprises?.find(
                 enterprise => enterprise.Id === selectedEnterpriseId
@@ -211,9 +217,9 @@ function App() {
 
             const newPayload: CreateReservationGroupPayload = {
                 ConfigurationId: selectedConfiguration?.Id,
-                CreditCardData: null, // TOOD maybe we donth have to use them
+                CreditCardData: null, 
                 Reservations: [reservation],
-                Customer: { Email: inputData.email, LastName: lastName},
+                Customer: { Email: reservationEmail, LastName: reservationLastName },
                 HotelId: selectedEnterpriseId,
             };
 
@@ -226,7 +232,7 @@ function App() {
 
             const enhancedReservations = responseJson.Reservations.map((reservation) => ({
                 ...reservation,
-                LastName: lastName
+                LastName: lastName ? lastName : reservation.LastName
             }));
 
             const enhancedReservationGroups = responseJson.ReservationGroups.map((group) => ({
@@ -246,6 +252,24 @@ function App() {
             setIsLoading(false);
         }
     };
+
+    const createMultipleReservations = async (num: number) => {
+        for (let i = 0; i < num; i++) {
+            const randomLastName = generateShortLastName();
+            const randomEmail = generateRandomEmail(randomLastName);
+    
+            await createReservation({
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                ageCategoryId: selectedAgeCategoryId!,
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                resourceCategoryId: selectedResourceCategoryId!,
+                email: randomEmail,
+                lastName: randomLastName
+            });
+        }
+        setSuccessMessage(`${num} reservations created successfully!`);
+    };
+    
 
 
     function handleLastNameClick(): void {
@@ -274,21 +298,17 @@ function App() {
                 setSuccessMessage('Enterprise added successfully');
                 setTimeout(() => {
                     setSuccessMessage(null);
-                }, 5000);  // Clear the message after 3 seconds
-                
-                // Clear the input fields
+                }, 5000);
+
                 enterpriseIDRef.current.value = '';
                 enterpriseNameRef.current.value = '';
             } catch (error) {
-                // Only enters this block if fetchEnterpriseConfiguration throws an error (e.g., due to a 400 status code)
                 console.error('Error validating EnterpriseID:', error);
                 setValidationError('Invalid EnterpriseID.'); 
             }
         }
     };
     
-
-
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout>;
         if (validationError) {
@@ -301,6 +321,7 @@ function App() {
             if (timer) clearTimeout(timer);
         };
     }, [validationError]);
+    
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout>;
         if (errorMessage) {
@@ -344,8 +365,8 @@ function App() {
                         />
                     </div>
                     <div className="fields-wrapper">
-                        <button onClick={() => setShowHiddenFields(!showHiddenFields)}>
-                        Add Enterprise
+                        <button className="uniform-width" onClick={() => setShowHiddenFields(!showHiddenFields)}>
+                        Admin Mode
                         </button>
                         <div className="center-content">
                             {showHiddenFields && (
@@ -358,7 +379,7 @@ function App() {
                                 EnterpriseName:
                                         <input className="uniform-width" type="text" ref={enterpriseNameRef} />
                                     </label>
-                                    <button onClick={addEnterpriseToDropdown}>Submit</button>
+                                    <button className="uniform-width" onClick={addEnterpriseToDropdown}>Submit</button>
                                     {validationError && (
                                         <div className={clsx('error-container', { 'dark-error': mode === 'dark', 'light-error': mode === 'light' })}>
                                             <span className="error-icon">⚠️</span>{validationError}
@@ -367,16 +388,30 @@ function App() {
                                     {successMessage && (
                                         <div className={clsx(
                                             'success-container', 
-                                            { 'dark-success': mode === 'dark', 'light-success': mode === 'light' } // Conditional classes
+                                            { 'dark-success': mode === 'dark', 'light-success': mode === 'light' }
                                         )}>
-                                            <span className="success-icon">✅</span> {/* Display a checkmark as a success icon */}
+                                            <span className="success-icon">✅</span>
                                             {successMessage}
                                         </div>
                                     )}
+                                    <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                                        <label>Number of Random Reservations:</label>
+                                        <input className="uniform-width" 
+                                            type="number" 
+                                            value={numReservations} 
+                                            onChange={e => setNumReservations(Number(e.target.value))}
+                                            min="1"
+                                        />
+                                        <button className="uniform-width" onClick={() => createMultipleReservations(numReservations)}>
+            Create Random Reservations
+                                        </button>
+                                    </label>
                                 </>
                             )}
                         </div>
+
                     </div>
+
 
                     <div className="center-content">
                         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
@@ -443,8 +478,7 @@ function App() {
                     </div>
                     {errorMessage && (
                         <div className={clsx('error-container', { 'dark-error': mode === 'dark', 'light-error': mode === 'light' })}>
-                            <span className="error-icon">⚠️</span> {/* You can replace with an actual error icon if you have one */}
-                            {errorMessage}
+                            <span className="error-icon">⚠️</span> {errorMessage}
                         </div>
                     )}
                     <div style={{fontSize: '20px', marginTop: '2rem'}}
