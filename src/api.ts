@@ -40,7 +40,7 @@ const ENV_URL = 'https://gx.mews-develop.com';
 const authCall = async <T>(endpoint: string, payload: T) => {
     const responseMeta = await fetch(endpoint, {
         method: 'POST',
-        body: JSON.stringify({...authProps, ...payload}),
+        body: JSON.stringify({ ...authProps, ...payload }),
     });
 
     if (!responseMeta.ok) {
@@ -131,7 +131,7 @@ export const fetchConfiguration = async (payload: ConfigurationOption): Promise<
 };
 
 export const fetchEnterpriseConfiguration = async (entepriseId: string) => {
-    return fetchConfiguration({Ids:[entepriseId], PrimaryId: entepriseId});
+    return fetchConfiguration({ Ids:[entepriseId], PrimaryId: entepriseId });
 };
 
 export interface ResourceCategoryPayload {

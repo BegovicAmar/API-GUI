@@ -16,6 +16,7 @@ import LoaderComponent from './components/LoaderComponent';
 import moment from 'moment-timezone';
 import { useThemeContext } from './hooks/useThemeValue';
 import { CustomInput } from './components/CustomInput';
+import { CustomSelect } from './components/CustomSelect';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -64,7 +65,7 @@ const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupC
 
 function App() {
     const [isLoading, setIsLoading] = useState(false);
-    const { setTheme, value: mode} = useThemeContext();
+    const { setTheme, value: mode } = useThemeContext();
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
@@ -167,7 +168,7 @@ function App() {
             });
         }
     };
-    const createReservation = async ({ageCategoryId, resourceCategoryId}: CreateReservationOptions) => {
+    const createReservation = async ({ ageCategoryId, resourceCategoryId }: CreateReservationOptions) => {
         setErrorMessage(null);
         setReservationDetails(null);
         setIsLoading(true);
@@ -208,7 +209,7 @@ function App() {
                 ConfigurationId: selectedConfiguration?.Id,
                 CreditCardData: null, // TOOD maybe we donth have to use them
                 Reservations: [reservation],
-                Customer: { Email: inputData.email, LastName: inputData.lastName},
+                Customer: { Email: inputData.email, LastName: inputData.lastName },
                 HotelId: selectedEnterpriseId,
             };
 
@@ -316,7 +317,7 @@ function App() {
         setSelectedResourceCategoryId(event.target.value);
     };
     return (
-        <div className={clsx('App', {dark: mode === 'dark'})}>
+        <div className={clsx('App', { dark: mode === 'dark' })}>
             {isLoading && <LoaderComponent type="reservation" />}
             { (selectedAgeCategoryId == null || selectedResourceCategoryId == null) ? (
                 <LoaderComponent type="configuration" />
@@ -381,30 +382,12 @@ function App() {
                             </select>
                         </label>
 
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-        Resource Category:
-                            <select
-                                className="uniform-width"
-                                value={selectedResourceCategoryId}
-                                onChange={handleResourceCategoryIdChange}
-                            >
-                                {resourceCategories.map(({Id,Name}) => (
-                                    <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
-                                ))}
-                            </select>
-                        </label>
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                Age Category:
-                            <select className="uniform-width" value={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange}>
-                                {ageCategories.map(({Id,Name}) => (
-                                    <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
-                                ))}
-                            </select>
-                        </label>
+                        <CustomSelect name="Resource category" values={resourceCategories.map(({ Id, Name }) =>({ value: Id, name: Name }))} selectedValue={selectedResourceCategoryId} onChange={handleResourceCategoryIdChange} />
+                        <CustomSelect name="Age Category" values={ageCategories.map(({ Id, Name }) =>({ value: Id, name: Name }))} selectedValue={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange} />
                         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                  Rate:
                             <select className="uniform-width" value={selectedRateId ?? ''} onChange={handleRateIdChange}>
-                                {rates.map(({Id,Name}) => (
+                                {rates.map(({ Id,Name }) => (
                                     <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
                                 ))}
                             </select>
@@ -415,7 +398,7 @@ function App() {
                         <CustomInput name="Email" value={inputData.email} onChange={(event) => handleOnDateChange('email', event)}/>
                         <CustomInput name="StartUtc" value={inputData.startUtc} onChange={(event) => handleOnDateChange('startUtc', event)}/>
                         <CustomInput name="EndUtc" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)}/>
-                        <button className="uniform-width" onClick={() => createReservation({ageCategoryId: selectedAgeCategoryId, resourceCategoryId: selectedResourceCategoryId})}>Create reservation</button>
+                        <button className="uniform-width" onClick={() => createReservation({ ageCategoryId: selectedAgeCategoryId, resourceCategoryId: selectedResourceCategoryId })}>Create reservation</button>
                     </div>
                     {errorMessage && (
                         <div className={clsx('error-container', { 'dark-error': mode === 'dark', 'light-error': mode === 'light' })}>
@@ -423,13 +406,13 @@ function App() {
                             {errorMessage}
                         </div>
                     )}
-                    <div style={{fontSize: '20px', marginTop: '2rem'}}
+                    <div style={{ fontSize: '20px', marginTop: '2rem' }}
                         className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                         {reservationDetails === null ? 'No reservation fetched' : (renderReservations(reservationDetails))}
                     </div>
                     {jsonData && (
                         <div className={isQRZoomed ? 'qr-zoomed-container' : ''} onClick={() => setQRZoomed(!isQRZoomed)}>
-                            <div className="qr-wrapper" style={{transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)', transition: 'transform 0.3s'}}>
+                            <div className="qr-wrapper" style={{ transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)', transition: 'transform 0.3s' }}>
                                 <QRCode value={jsonData}/>
                             </div>
                         </div>

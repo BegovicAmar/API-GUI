@@ -8,7 +8,7 @@ interface CustomInputProps<T> {
     name: string;
 }
 
-export const CustomInput = ({ value,name,onChange}: CustomInputProps<string | number>) => {
+export const CustomInput = ({ value,name,onChange }: CustomInputProps<string | number>) => {
     const mode = useThemeContextValue();
 
     return (

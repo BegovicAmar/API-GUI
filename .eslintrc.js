@@ -36,6 +36,8 @@ module.exports = {
         'jsx-a11y',
     ],
     'rules': {
+        "no-unused-vars": "off",
+        "object-curly-spacing": ["error", "always"],
         "@typescript-eslint/no-unused-vars": ["error"],
         'arrow-parens': ['error', 'always'],
         'comma-dangle': ['error', 'always-multiline'],
