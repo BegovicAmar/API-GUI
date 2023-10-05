@@ -10,10 +10,11 @@ import {
     ReservationsGroupCreateResponse, AgeCategory, ResourceCategory, isSuccessfulReservationGroupResponse, Rate, fetchRateIds, RatePayload
 } from './api';
 import clsx from 'clsx';
-import { DarkModeToggle, Mode } from '@anatoliygatt/dark-mode-toggle';
+import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
 import LoaderComponent from './components/LoaderComponent';
 import moment from 'moment-timezone';
+import { useThemeContext } from './hooks/useThemeValue';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -63,7 +64,7 @@ const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupC
 
 function App() {
     const [isLoading, setIsLoading] = useState(false);
-    const [mode, setMode] = useState<Mode>(() => window.localStorage.getItem('themeMode') as Mode || 'dark');
+    const { setTheme, value: mode} = useThemeContext();
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
@@ -76,13 +77,13 @@ function App() {
     const [validationError, setValidationError] = useState<string | null>(null);
     const [showHiddenFields, setShowHiddenFields] = useState(false);
     const enterpriseIDRef = useRef<HTMLInputElement>(null);
-    const enterpriseNameRef = useRef<HTMLInputElement>(null);    
+    const enterpriseNameRef = useRef<HTMLInputElement>(null);
     const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
     const [enterprises, setEnterprises] = useState([
         { id: '8a51f050-8467-4e92-84d5-abc800c810b8', name: 'Bespin' },
         { id: 'dab943a7-7f00-4656-b383-ae5a01007136', name: 'Mews Guest Journey Hotel' },
         { id: '5565d322-2505-4450-8284-aca8016c4844', name: 'Chicago UTC' },
-    ]);    
+    ]);
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
@@ -98,15 +99,15 @@ function App() {
             configDataPromise.then((configData) => {
                 setConfigurationData(configData);
                 setAgeCategories(configData.AgeCategories);
-    
+
                 if (!selectedAgeCategoryId || !configData.AgeCategories.find(cat => cat.Id === selectedAgeCategoryId)) {
                     setSelectedAgeCategoryId(configData.AgeCategories[0]?.Id || null);
                 }
-    
+
                 if (configData?.BookingEngines?.[0]) {
                     const serviceId = configData?.BookingEngines?.[0].ServiceId;
                     const bookingEngineId = configData?.BookingEngines?.[0].Id;
-    
+
                     const resourceCategoryPromise = fetchResourceCategories({ ServiceId: serviceId });
                     resourceCategoryPromise.then((resourceCategoryResponse) => {
                         setResourceCategories(resourceCategoryResponse.ResourceCategories);
@@ -116,7 +117,7 @@ function App() {
                             const timezone = configData?.Enterprises?.find(
                                 enterprise => enterprise.Id === selectedEnterpriseId
                             )?.IanaTimeZoneIdentifier;
-    
+
                             const startMoment = timezone ? moment.tz(`${inputData.startUtc}T00:00:00`, timezone).toISOString() : inputData.startUtc;
                             const endMoment = timezone ? moment.tz(`${inputData.endUtc}T00:00:00`, timezone).toISOString() : inputData.endUtc;
 
@@ -126,7 +127,7 @@ function App() {
                                 BookingEngineId: bookingEngineId,
                                 CategoryId: resourceCategoryResponse.ResourceCategories[0].Id,
                                 AgeCategoryId: configData.AgeCategories[0].Id,
-                                StartUtc: startMoment, 
+                                StartUtc: startMoment,
                                 EndUtc: endMoment
                             };
                             fetchRateIds(ratePayload).then(rateResponse => {
@@ -139,7 +140,7 @@ function App() {
         } catch (error) {
             console.error('Error fetching data', error);
         }
-        
+
     }, [inputData.endUtc, inputData.startUtc, selectedAgeCategoryId, selectedEnterpriseId]);
 
 
@@ -181,7 +182,7 @@ function App() {
                 enterprise => enterprise.Id === selectedEnterpriseId
             );
             const selectedConfiguration = configurationData?.BookingEngines?.[0];
-        
+
             const timezone = selectedEnterprise?.IanaTimeZoneIdentifier;
 
             if (!timezone || selectedConfiguration?.Id == null) {
@@ -194,7 +195,7 @@ function App() {
             const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
 
             const rateId = selectedRateId || (rates.length > 0 ? rates[0].Id : 'fd666d4c-1472-4a61-b490-aeda00cd7e3a');
-            
+
             const reservation = createSingleReservation({
                 Identifier: Math.random().toString(),
                 StartUtc: startMoment.toISOString(),
@@ -258,15 +259,15 @@ function App() {
         }));
     }
 
-    
+
     const addEnterpriseToDropdown = async () => {
         const idValue = enterpriseIDRef.current?.value;
         const nameValue = enterpriseNameRef.current?.value;
-    
+
         if (idValue && nameValue) {
             try {
                 await fetchEnterpriseConfiguration(idValue);
-                
+
                 setEnterprises((prevEnterprises) => [
                     ...prevEnterprises,
                     { id: idValue, name: nameValue },
@@ -275,18 +276,18 @@ function App() {
                 setTimeout(() => {
                     setSuccessMessage(null);
                 }, 5000);  // Clear the message after 3 seconds
-                
+
                 // Clear the input fields
                 enterpriseIDRef.current.value = '';
                 enterpriseNameRef.current.value = '';
             } catch (error) {
                 // Only enters this block if fetchEnterpriseConfiguration throws an error (e.g., due to a 400 status code)
                 console.error('Error validating EnterpriseID:', error);
-                setValidationError('Invalid EnterpriseID.'); 
+                setValidationError('Invalid EnterpriseID.');
             }
         }
     };
-    
+
 
 
     useEffect(() => {
@@ -338,8 +339,8 @@ function App() {
                             light="Light"
                             size="sm"
                             onChange={(mode) => {
-                                setMode(mode);
-                                window.localStorage.setItem('themeMode', mode);
+                                setTheme(mode);
+                                // window.localStorage.setItem('themeMode', mode);
                             }}
                         />
                     </div>
@@ -366,7 +367,7 @@ function App() {
                                     )}
                                     {successMessage && (
                                         <div className={clsx(
-                                            'success-container', 
+                                            'success-container',
                                             { 'dark-success': mode === 'dark', 'light-success': mode === 'light' } // Conditional classes
                                         )}>
                                             <span className="success-icon">✅</span> {/* Display a checkmark as a success icon */}
