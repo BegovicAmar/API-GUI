@@ -7,24 +7,13 @@ interface CustomInputProps<T> {
     name: string;
 }
 
-export const CustomInput = ({
-    value,
-    name,
-    onChange,
-}: CustomInputProps<string | number>) => {
+export const CustomInput = ({ value, name, onChange }: CustomInputProps<string | number>) => {
     const mode = useThemeContextValue();
 
     return (
-        <label
-            className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
-        >
+        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
             {name}:
-            <input
-                className="uniform-width"
-                type="text"
-                value={value}
-                onChange={onChange}
-            />
+            <input className="uniform-width" type="text" value={value} onChange={onChange} />
         </label>
     );
 };

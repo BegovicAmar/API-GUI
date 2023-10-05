@@ -3,9 +3,7 @@ import './LoaderComponent.css';
 
 type LoaderType = 'reservation' | 'configuration';
 
-const LoaderComponent: React.FC<{ type: LoaderType }> = ({
-    type = 'reservation',
-}) => {
+const LoaderComponent: React.FC<{ type: LoaderType }> = ({ type = 'reservation' }) => {
     const messages: Record<LoaderType, string> = {
         reservation: 'Creating reservation...',
         configuration: 'Fetching configuration...',

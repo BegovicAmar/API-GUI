@@ -14,24 +14,13 @@ interface CustomInputProps<T> {
     name: string;
 }
 
-export const CustomSelect = ({
-    selectedValue,
-    name,
-    onChange,
-    values,
-}: CustomInputProps<string | number>) => {
+export const CustomSelect = ({ selectedValue, name, onChange, values }: CustomInputProps<string | number>) => {
     const mode = useThemeContextValue();
 
     return (
-        <label
-            className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
-        >
+        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
             {name}:
-            <select
-                className="uniform-width"
-                value={selectedValue}
-                onChange={onChange}
-            >
+            <select className="uniform-width" value={selectedValue} onChange={onChange}>
                 {values.map(({ value, name }) => (
                     <option key={value} value={value}>
                         {getDefaultLanguageTextOrFallback(name)}

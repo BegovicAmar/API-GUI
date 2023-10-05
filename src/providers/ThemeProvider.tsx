@@ -16,17 +16,11 @@ interface ThemeProviderProps {
     children: React.ReactNode;
 }
 export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-    const [mode, setMode] = useState<Mode>(
-        () => (window.localStorage.getItem('themeMode') as Mode) || 'dark',
-    );
+    const [mode, setMode] = useState<Mode>(() => (window.localStorage.getItem('themeMode') as Mode) || 'dark');
 
     const setTheme = (value: Mode) => {
         window.localStorage.setItem('themeMode', value);
         setMode(value);
     };
-    return (
-        <ThemeContext.Provider value={{ value: mode, setTheme }}>
-            {children}
-        </ThemeContext.Provider>
-    );
+    return <ThemeContext.Provider value={{ value: mode, setTheme }}>{children}</ThemeContext.Provider>;
 };

@@ -31,6 +31,7 @@ interface AuthOptions {
 
 const authProps: AuthOptions = {
     Session:
+        // eslint-disable-next-line max-len
         '09809905205405004804809705004805005104504805704504905008404805505804805705805304809032AC2453BCF3B25E69D103EF54026E4C',
     Client: 'Mews Distributor 1821.0.0',
     CurrencyCode: 'EUR',
@@ -89,18 +90,15 @@ export interface CreateReservationGroupPayload {
 }
 
 export const isSuccessfulReservationGroupResponse = (
-    response: ReservationsGroupCreateResponse | FailedResponse,
+    response: ReservationsGroupCreateResponse | FailedResponse
 ): response is ReservationsGroupCreateResponse => {
     return 'Reservations' in response;
 };
 
 export const fetchCreateReservation = async (
-    payload: CreateReservationGroupPayload,
+    payload: CreateReservationGroupPayload
 ): Promise<ReservationsGroupCreateResponse | FailedResponse> => {
-    return authCall(
-        `${ENV_URL}/api/bookingEngine/v1/reservationGroups/create`,
-        payload,
-    );
+    return authCall(`${ENV_URL}/api/bookingEngine/v1/reservationGroups/create`, payload);
 };
 
 export const createSingleReservation = (res: ReservationRequest) => {
@@ -135,13 +133,8 @@ export interface ConfigurationGetResponse {
     AgeCategories: AgeCategory[];
 }
 
-export const fetchConfiguration = async (
-    payload: ConfigurationOption,
-): Promise<ConfigurationGetResponse> => {
-    return authCall(
-        `${ENV_URL}/api/bookingEngine/v1/configurations/get`,
-        payload,
-    );
+export const fetchConfiguration = async (payload: ConfigurationOption): Promise<ConfigurationGetResponse> => {
+    return authCall(`${ENV_URL}/api/bookingEngine/v1/configurations/get`, payload);
 };
 
 export const fetchEnterpriseConfiguration = async (entepriseId: string) => {
@@ -162,13 +155,8 @@ interface ResourceCategoryResponse {
     ResourceCategories: Array<ResourceCategory>;
 }
 
-export const fetchResourceCategories = async (
-    payload: ResourceCategoryPayload,
-): Promise<ResourceCategoryResponse> => {
-    return authCall(
-        `${ENV_URL}/api/bookingEngine/v1/resourceCategories/getAll`,
-        payload,
-    );
+export const fetchResourceCategories = async (payload: ResourceCategoryPayload): Promise<ResourceCategoryResponse> => {
+    return authCall(`${ENV_URL}/api/bookingEngine/v1/resourceCategories/getAll`, payload);
 };
 
 export interface RatePayload {
@@ -190,11 +178,6 @@ interface RateResponse {
     Rates: Array<Rate>;
 }
 
-export const fetchRateIds = async (
-    payload: RatePayload,
-): Promise<RateResponse> => {
-    return authCall(
-        `${ENV_URL}/api/bookingEngine/v1/services/getPricing`,
-        payload,
-    );
+export const fetchRateIds = async (payload: RatePayload): Promise<RateResponse> => {
+    return authCall(`${ENV_URL}/api/bookingEngine/v1/services/getPricing`, payload);
 };
