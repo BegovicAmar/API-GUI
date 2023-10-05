@@ -10,12 +10,14 @@ export interface PoorEnterprise {
 }
 
 interface AddEnterpriseProps {
-    addEnterprise: (enterprises:PoorEnterprise ) => void;
+    addEnterprise: (enterprises: PoorEnterprise) => void;
 }
 
 export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
     const [showHiddenFields, setShowHiddenFields] = useState(false);
-    const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = React.useState<string | null>(
+        null,
+    );
     const mode = useThemeContextValue();
     const enterpriseIDRef = useRef<HTMLInputElement>(null);
     // const enterpriseNameRef = useRef<HTMLInputElement>(null);
@@ -27,12 +29,16 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
         if (idValue) {
             try {
                 const response = await fetchEnterpriseConfiguration(idValue);
-                const enterpriseName = getDefaultLanguageTextOrFallback(response.Enterprises[0].Name);
+                const enterpriseName = getDefaultLanguageTextOrFallback(
+                    response.Enterprises[0].Name,
+                );
                 addEnterprise({ id: idValue, name: enterpriseName });
-                setSuccessMessage(`Enterprise "${enterpriseName}" added successfully`);
+                setSuccessMessage(
+                    `Enterprise "${enterpriseName}" added successfully`,
+                );
                 setTimeout(() => {
                     setSuccessMessage(null);
-                }, 5000);  // Clear the message after 3 seconds
+                }, 5000); // Clear the message after 3 seconds
 
                 // Clear the input fields
                 enterpriseIDRef.current.value = '';
@@ -65,22 +71,46 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
             <div className="center-content">
                 {showHiddenFields && (
                     <>
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                        <label
+                            className={
+                                mode === 'dark'
+                                    ? 'dark-mode-label'
+                                    : 'light-mode-label'
+                            }
+                        >
                             EnterpriseID:
-                            <input className="uniform-width" type="text" ref={enterpriseIDRef} />
+                            <input
+                                className="uniform-width"
+                                type="text"
+                                ref={enterpriseIDRef}
+                            />
                         </label>
-                        <button onClick={addEnterpriseToDropdown}>Submit</button>
+                        <button onClick={addEnterpriseToDropdown}>
+                            Submit
+                        </button>
                         {validationError && (
-                            <div className={clsx('error-container', { 'dark-error': mode === 'dark', 'light-error': mode === 'light' })}>
-                                <span className="error-icon">⚠️</span>{validationError}
+                            <div
+                                className={clsx('error-container', {
+                                    'dark-error': mode === 'dark',
+                                    'light-error': mode === 'light',
+                                })}
+                            >
+                                <span className="error-icon">⚠️</span>
+                                {validationError}
                             </div>
                         )}
                         {successMessage && (
-                            <div className={clsx(
-                                'success-container',
-                                { 'dark-success': mode === 'dark', 'light-success': mode === 'light' }, // Conditional classes
-                            )}>
-                                <span className="success-icon">✅</span> {/* Display a checkmark as a success icon */}
+                            <div
+                                className={clsx(
+                                    'success-container',
+                                    {
+                                        'dark-success': mode === 'dark',
+                                        'light-success': mode === 'light',
+                                    }, // Conditional classes
+                                )}
+                            >
+                                <span className="success-icon">✅</span>{' '}
+                                {/* Display a checkmark as a success icon */}
                                 {successMessage}
                             </div>
                         )}
@@ -88,6 +118,5 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                 )}
             </div>
         </div>
-
-    )
-}
+    );
+};

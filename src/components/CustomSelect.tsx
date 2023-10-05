@@ -9,16 +9,23 @@ interface SelectValue {
 interface CustomInputProps<T> {
     // eslint-disable-next-line no-unused-vars
     onChange: (event: ChangeEvent<HTMLSelectElement>) => void;
-    selectedValue: T
+    selectedValue: T;
     values: SelectValue[];
     name: string;
 }
 
-export const CustomSelect = ({ selectedValue,name,onChange, values }: CustomInputProps<string | number>) => {
+export const CustomSelect = ({
+    selectedValue,
+    name,
+    onChange,
+    values,
+}: CustomInputProps<string | number>) => {
     const mode = useThemeContextValue();
 
     return (
-        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+        <label
+            className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
+        >
             {name}:
             <select
                 className="uniform-width"
@@ -26,7 +33,9 @@ export const CustomSelect = ({ selectedValue,name,onChange, values }: CustomInpu
                 onChange={onChange}
             >
                 {values.map(({ value, name }) => (
-                    <option key={value} value={value}>{getDefaultLanguageTextOrFallback(name)}</option>
+                    <option key={value} value={value}>
+                        {getDefaultLanguageTextOrFallback(name)}
+                    </option>
                 ))}
             </select>
         </label>

@@ -1,44 +1,48 @@
 module.exports = {
-    'env': {
-        'browser': true,
-        'es2021': true,
+    env: {
+        browser: true,
+        es2021: true,
     },
-    'extends': [
+    extends: [
         // 'airbnb-typescript',
         'airbnb/hooks',
         'plugin:@typescript-eslint/recommended',
         'eslint:recommended',
         'plugin:react/recommended',
+        'plugin:prettier/recommended',
         // 'eslint-plugin-jsx-a11y',
     ],
-    'overrides': [
+    overrides: [
         {
-            'env': {
-                'node': true,
+            env: {
+                node: true,
             },
-            'files': [
-                '.eslintrc.{js,cjs}',
-            ],
-            'parserOptions': {
-                'sourceType': 'script',
+            files: ['.eslintrc.{js,cjs}'],
+            parserOptions: {
+                sourceType: 'script',
             },
         },
     ],
-    'parser': '@typescript-eslint/parser',
-    'parserOptions': {
-        'ecmaVersion': 'latest',
-        'sourceType': 'module',
+    parser: '@typescript-eslint/parser',
+    parserOptions: {
+        ecmaVersion: 'latest',
+        sourceType: 'module',
     },
-    'plugins': [
-        '@typescript-eslint',
-        'react',
-        'jest',
-        'jsx-a11y',
-    ],
-    'rules': {
-        "no-unused-vars": "off",
-        "object-curly-spacing": ["error", "always"],
-        "@typescript-eslint/no-unused-vars": ["error"],
+    plugins: ['@typescript-eslint', 'react', 'jest', 'jsx-a11y', 'prettier'],
+    rules: {
+        'prettier/prettier': [
+            //or whatever plugin that is causing the clash
+            'error',
+            {
+                tabWidth: 4,
+                singleQuote: true,
+            },
+        ],
+        // quotes: ['error', 'single'],
+        'max-len': ['error', { code: 140 }],
+        'no-unused-vars': 'off',
+        'object-curly-spacing': ['error', 'always'],
+        '@typescript-eslint/no-unused-vars': ['error'],
         'arrow-parens': ['error', 'always'],
         'comma-dangle': ['error', 'always-multiline'],
         'consistent-return': ['off'],
@@ -58,7 +62,11 @@ module.exports = {
         'no-use-before-define': ['off'],
         'no-var': ['off'],
         'no-void': ['off'], // ['error', { allowAsStatement: true }],
-        'operator-linebreak': ['error', 'after', { overrides: { '?': 'ignore', ':': 'ignore' } }],
+        'operator-linebreak': [
+            'error',
+            'after',
+            { overrides: { '?': 'ignore', ':': 'ignore' } },
+        ],
         'prefer-destructuring': ['error', { object: true, array: false }],
         'prefer-template': ['off'],
         'vars-on-top': ['off'],
@@ -106,8 +114,14 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': ['warn'],
         'jsx-a11y/no-static-element-interactions': ['warn'],
 
-        'react/default-props-match-prop-types': ['error', { allowRequiredDefaults: true }],
-        'react/jsx-handler-names': ['error', { eventHandlerPrefix: 'handle', eventHandlerPropPrefix: 'on' }],
+        'react/default-props-match-prop-types': [
+            'error',
+            { allowRequiredDefaults: true },
+        ],
+        'react/jsx-handler-names': [
+            'error',
+            { eventHandlerPrefix: 'handle', eventHandlerPropPrefix: 'on' },
+        ],
         'react/jsx-filename-extension': ['off'],
         'react/jsx-curly-spacing': ['error', 'never'],
         'react/no-danger': ['error'],
@@ -138,6 +152,5 @@ module.exports = {
 
         'react-hooks/rules-of-hooks': 'error',
         'react-hooks/exhaustive-deps': 'error',
-
     },
 };
