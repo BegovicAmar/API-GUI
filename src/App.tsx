@@ -19,7 +19,6 @@ import { CustomInput } from './components/CustomInput';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
-
     const reservationItems = reservationsGroupCreateResponse.Reservations?.map((reservation) => (
         <div key={reservation.Id}>
             <p>LastName: {reservation.LastName}</p>

@@ -3,7 +3,6 @@ import { Mode } from '@anatoliygatt/dark-mode-toggle';
 
 interface ThemeContextProps {
     value: Mode;
-    // eslint-disable-next-line no-unused-vars
     setTheme: (value: Mode) => void;
 }
 

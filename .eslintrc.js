@@ -36,6 +36,7 @@ module.exports = {
         'jsx-a11y',
     ],
     'rules': {
+        "@typescript-eslint/no-unused-vars": ["error"],
         'arrow-parens': ['error', 'always'],
         'comma-dangle': ['error', 'always-multiline'],
         'consistent-return': ['off'],
