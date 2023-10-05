@@ -15,6 +15,7 @@ import QRCode from 'qrcode.react';
 import LoaderComponent from './components/LoaderComponent';
 import moment from 'moment-timezone';
 import { useThemeContext } from './hooks/useThemeValue';
+import { CustomInput } from './components/CustomInput';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -72,7 +73,6 @@ function App() {
     const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string | null>(null);
     const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>([]);
     const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string | null>(null);
-    const [lastName, setLastName] = useState<string>(randomLastName);
     const [rates, setRates] = useState<Rate[]>([]);
     const [validationError, setValidationError] = useState<string | null>(null);
     const [showHiddenFields, setShowHiddenFields] = useState(false);
@@ -146,10 +146,6 @@ function App() {
 
     const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
 
-    const handleInputOnChange = (name: string, event: ChangeEvent<HTMLInputElement>) => {
-        setInputData({...inputData, [name]: event.target.value});
-    };
-
     const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(event.target.value);
     };
@@ -214,7 +210,7 @@ function App() {
                 ConfigurationId: selectedConfiguration?.Id,
                 CreditCardData: null, // TOOD maybe we donth have to use them
                 Reservations: [reservation],
-                Customer: { Email: inputData.email, LastName: lastName},
+                Customer: { Email: inputData.email, LastName: inputData.lastName},
                 HotelId: selectedEnterpriseId,
             };
 
@@ -227,7 +223,7 @@ function App() {
 
             const enhancedReservations = responseJson.Reservations.map((reservation) => ({
                 ...reservation,
-                LastName: lastName
+                LastName: inputData.lastName
             }));
 
             const enhancedReservationGroups = responseJson.ReservationGroups.map((group) => ({
@@ -251,7 +247,7 @@ function App() {
 
     function handleLastNameClick(): void {
         const newLastName = generateShortLastName();
-        setLastName(newLastName);
+        // setLastName(newLastName);
         setInputData(prevData => ({
             ...prevData,
             email: generateRandomEmail(newLastName),
@@ -420,26 +416,11 @@ function App() {
                             </select>
                         </label>
 
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                            <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
-                    LastName:
-                            <input className="uniform-width" type="text" value={lastName} onChange={(event) => {
-                                setLastName(event.target.value);
-                                handleInputOnChange('lastName', event);
-                            }}/>
-                        </label>
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    Email:
-                            <input className="uniform-width" type="text" value={inputData.email} onChange={(event) => handleInputOnChange('email', event)}/>
-                        </label>
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    StartUtc:
-                            <input className="uniform-width" type="date" value={inputData.startUtc} onChange={(event) => handleOnDateChange('startUtc', event)}/>
-                        </label>
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    EndUtc:
-                            <input className="uniform-width" type="date" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)}/>
-                        </label>
+                        <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
+                        <CustomInput name="LastName" value={inputData.lastName} onChange={(event) => handleOnDateChange('lastName', event)}/>
+                        <CustomInput name="Email" value={inputData.email} onChange={(event) => handleOnDateChange('email', event)}/>
+                        <CustomInput name="StartUtc" value={inputData.startUtc} onChange={(event) => handleOnDateChange('startUtc', event)}/>
+                        <CustomInput name="EndUtc" value={inputData.endUtc} onChange={(event) => handleOnDateChange('endUtc', event)}/>
                         <button className="uniform-width" onClick={() => createReservation({ageCategoryId: selectedAgeCategoryId, resourceCategoryId: selectedResourceCategoryId})}>Create reservation</button>
                     </div>
                     {errorMessage && (
