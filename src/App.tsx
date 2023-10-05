@@ -2,12 +2,12 @@ import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
 import './App.css';
 import { generateRandomEmail, generateShortLastName, getDefaultLanguageTextOrFallback, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
-    ConfigurationGetResponse, CreateReservationGroupPayload,
+    AgeCategory, ConfigurationGetResponse,
+    CreateReservationGroupPayload,
     createSingleReservation,
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
-    fetchResourceCategories,
-    ReservationsGroupCreateResponse, AgeCategory, ResourceCategory, isSuccessfulReservationGroupResponse, Rate, fetchRateIds, RatePayload
+    fetchRateIds, fetchResourceCategories, isSuccessfulReservationGroupResponse, Rate, RatePayload, ReservationsGroupCreateResponse, ResourceCategory,
 } from './api';
 import clsx from 'clsx';
 import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
@@ -54,11 +54,11 @@ const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupC
     if (!reservationsGroupCreateResponse) return null;
 
     const formattedData = {
-        Reservations: reservationsGroupCreateResponse.Reservations?.map(reservation => ({
+        Reservations: reservationsGroupCreateResponse.Reservations?.map((reservation) => ({
             Id: reservation.Id,
             GroupId: '00000000-0000-0000-0000-000000000000',
-            CustomerId: reservationsGroupCreateResponse.ReservationGroups?.[0]?.CustomerId || ''
-        }))
+            CustomerId: reservationsGroupCreateResponse.ReservationGroups?.[0]?.CustomerId || '',
+        })),
     };
     return JSON.stringify(formattedData);
 };
@@ -90,7 +90,7 @@ function App() {
         email: generateRandomEmail(randomLastName),
         lastName: randomLastName,
         startUtc: getTodaysDate(),
-        endUtc: getEndDateFromStartDate(getTodaysDate())
+        endUtc: getEndDateFromStartDate(getTodaysDate()),
     });
 
     useEffect(() => {
@@ -100,7 +100,7 @@ function App() {
                 setConfigurationData(configData);
                 setAgeCategories(configData.AgeCategories);
 
-                if (!selectedAgeCategoryId || !configData.AgeCategories.find(cat => cat.Id === selectedAgeCategoryId)) {
+                if (!selectedAgeCategoryId || !configData.AgeCategories.find((cat) => cat.Id === selectedAgeCategoryId)) {
                     setSelectedAgeCategoryId(configData.AgeCategories[0]?.Id || null);
                 }
 
@@ -115,7 +115,7 @@ function App() {
                             setSelectedResourceCategoryId(resourceCategoryResponse.ResourceCategories[0].Id);
 
                             const timezone = configData?.Enterprises?.find(
-                                enterprise => enterprise.Id === selectedEnterpriseId
+                                (enterprise) => enterprise.Id === selectedEnterpriseId,
                             )?.IanaTimeZoneIdentifier;
 
                             const startMoment = timezone ? moment.tz(`${inputData.startUtc}T00:00:00`, timezone).toISOString() : inputData.startUtc;
@@ -128,9 +128,9 @@ function App() {
                                 CategoryId: resourceCategoryResponse.ResourceCategories[0].Id,
                                 AgeCategoryId: configData.AgeCategories[0].Id,
                                 StartUtc: startMoment,
-                                EndUtc: endMoment
+                                EndUtc: endMoment,
                             };
-                            fetchRateIds(ratePayload).then(rateResponse => {
+                            fetchRateIds(ratePayload).then((rateResponse) => {
                                 setRates(rateResponse.Rates);
                             });
                         }
@@ -142,7 +142,6 @@ function App() {
         }
 
     }, [inputData.endUtc, inputData.startUtc, selectedAgeCategoryId, selectedEnterpriseId]);
-
 
     const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
 
@@ -160,12 +159,12 @@ function App() {
             setInputData({
                 ...inputData,
                 [name]: newDate,
-                endUtc: getEndDateFromStartDate(newDate)
+                endUtc: getEndDateFromStartDate(newDate),
             });
         } else {
             setInputData({
                 ...inputData,
-                [name]: newDate
+                [name]: newDate,
             });
         }
     };
@@ -175,7 +174,7 @@ function App() {
         setIsLoading(true);
         try {
             const selectedEnterprise = configurationData?.Enterprises?.find(
-                enterprise => enterprise.Id === selectedEnterpriseId
+                (enterprise) => enterprise.Id === selectedEnterpriseId,
             );
             const selectedConfiguration = configurationData?.BookingEngines?.[0];
 
@@ -223,17 +222,17 @@ function App() {
 
             const enhancedReservations = responseJson.Reservations.map((reservation) => ({
                 ...reservation,
-                LastName: inputData.lastName
+                LastName: inputData.lastName,
             }));
 
             const enhancedReservationGroups = responseJson.ReservationGroups.map((group) => ({
-                ...group
+                ...group,
             }));
 
             const enhancedResponse = {
                 ...responseJson,
                 Reservations: enhancedReservations,
-                ReservationGroups: enhancedReservationGroups
+                ReservationGroups: enhancedReservationGroups,
             };
 
             setReservationDetails(enhancedResponse);
@@ -244,17 +243,15 @@ function App() {
         }
     };
 
-
     function handleLastNameClick(): void {
         const newLastName = generateShortLastName();
         // setLastName(newLastName);
-        setInputData(prevData => ({
+        setInputData((prevData) => ({
             ...prevData,
             email: generateRandomEmail(newLastName),
-            lastName: newLastName
+            lastName: newLastName,
         }));
     }
-
 
     const addEnterpriseToDropdown = async () => {
         const idValue = enterpriseIDRef.current?.value;
@@ -283,8 +280,6 @@ function App() {
             }
         }
     };
-
-
 
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout>;
@@ -364,7 +359,7 @@ function App() {
                                     {successMessage && (
                                         <div className={clsx(
                                             'success-container',
-                                            { 'dark-success': mode === 'dark', 'light-success': mode === 'light' } // Conditional classes
+                                            { 'dark-success': mode === 'dark', 'light-success': mode === 'light' }, // Conditional classes
                                         )}>
                                             <span className="success-icon">✅</span> {/* Display a checkmark as a success icon */}
                                             {successMessage}
