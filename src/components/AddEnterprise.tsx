@@ -37,6 +37,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                 // Clear the input fields
                 enterpriseIDRef.current.value = '';
             } catch (error) {
+                // eslint-disable-next-line max-len
                 // Only enters this block if fetchEnterpriseConfiguration throws an error (e.g., due to a 400 status code)
                 console.error('Error validating EnterpriseID:', error);
                 setValidationError('Invalid EnterpriseID.');
