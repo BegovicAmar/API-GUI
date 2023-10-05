@@ -1,6 +1,6 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import './App.css';
-import { generateRandomEmail, generateShortLastName, getDefaultLanguageTextOrFallback, getEndDateFromStartDate, getTodaysDate } from './utils';
+import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
     AgeCategory, ConfigurationGetResponse,
     CreateReservationGroupPayload,
@@ -17,6 +17,8 @@ import moment from 'moment-timezone';
 import { useThemeContext } from './hooks/useThemeValue';
 import { CustomInput } from './components/CustomInput';
 import { CustomSelect } from './components/CustomSelect';
+import { DEFAULT_LANGUAGE_CODE } from './constants';
+import { AddEnterprise, PoorEnterprise } from './components/AddEnterprise';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -74,16 +76,15 @@ function App() {
     const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>([]);
     const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string | null>(null);
     const [rates, setRates] = useState<Rate[]>([]);
-    const [validationError, setValidationError] = useState<string | null>(null);
-    const [showHiddenFields, setShowHiddenFields] = useState(false);
-    const enterpriseIDRef = useRef<HTMLInputElement>(null);
-    const enterpriseNameRef = useRef<HTMLInputElement>(null);
-    const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
-    const [enterprises, setEnterprises] = useState([
+
+    const [enterprises, setEnterprises] = useState<PoorEnterprise[]>([
         { id: '8a51f050-8467-4e92-84d5-abc800c810b8', name: 'Bespin' },
         { id: 'dab943a7-7f00-4656-b383-ae5a01007136', name: 'Mews Guest Journey Hotel' },
         { id: '5565d322-2505-4450-8284-aca8016c4844', name: 'Chicago UTC' },
     ]);
+    const addEnterprise = (enterprise: PoorEnterprise) => {
+        setEnterprises([...enterprises, enterprise]);
+    }
     const [selectedRateId, setSelectedRateId] = useState<string | null>(null);
     const [reservationDetails, setReservationDetails] = useState<ReservationsGroupCreateResponse | null>(null);
     const [inputData, setInputData] = useState({
@@ -132,6 +133,7 @@ function App() {
                             };
                             fetchRateIds(ratePayload).then((rateResponse) => {
                                 setRates(rateResponse.Rates);
+                                setSelectedRateId(rateResponse.Rates[0].Id)
                             });
                         }
                     });
@@ -253,46 +255,6 @@ function App() {
         }));
     }
 
-    const addEnterpriseToDropdown = async () => {
-        const idValue = enterpriseIDRef.current?.value;
-        const nameValue = enterpriseNameRef.current?.value;
-
-        if (idValue && nameValue) {
-            try {
-                await fetchEnterpriseConfiguration(idValue);
-
-                setEnterprises((prevEnterprises) => [
-                    ...prevEnterprises,
-                    { id: idValue, name: nameValue },
-                ]);
-                setSuccessMessage('Enterprise added successfully');
-                setTimeout(() => {
-                    setSuccessMessage(null);
-                }, 5000);  // Clear the message after 3 seconds
-
-                // Clear the input fields
-                enterpriseIDRef.current.value = '';
-                enterpriseNameRef.current.value = '';
-            } catch (error) {
-                // Only enters this block if fetchEnterpriseConfiguration throws an error (e.g., due to a 400 status code)
-                console.error('Error validating EnterpriseID:', error);
-                setValidationError('Invalid EnterpriseID.');
-            }
-        }
-    };
-
-    useEffect(() => {
-        let timer: ReturnType<typeof setTimeout>;
-        if (validationError) {
-            timer = setTimeout(() => {
-                setValidationError(null);
-            }, 5000);
-        }
-
-        return () => {
-            if (timer) clearTimeout(timer);
-        };
-    }, [validationError]);
     useEffect(() => {
         let timer: ReturnType<typeof setTimeout>;
         if (errorMessage) {
@@ -316,10 +278,11 @@ function App() {
     const handleResourceCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedResourceCategoryId(event.target.value);
     };
+
     return (
         <div className={clsx('App', { dark: mode === 'dark' })}>
             {isLoading && <LoaderComponent type="reservation" />}
-            { (selectedAgeCategoryId == null || selectedResourceCategoryId == null) ? (
+            { (selectedAgeCategoryId == null || selectedResourceCategoryId == null || selectedRateId == null) ? (
                 <LoaderComponent type="configuration" />
             ) : (
                 <>
@@ -335,64 +298,13 @@ function App() {
                             }}
                         />
                     </div>
-                    <div className="fields-wrapper">
-                        <button onClick={() => setShowHiddenFields(!showHiddenFields)}>
-                        Add Enterprise
-                        </button>
-                        <div className="center-content">
-                            {showHiddenFields && (
-                                <>
-                                    <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                                EnterpriseID:
-                                        <input className="uniform-width" type="text" ref={enterpriseIDRef} />
-                                    </label>
-                                    <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                                EnterpriseName:
-                                        <input className="uniform-width" type="text" ref={enterpriseNameRef} />
-                                    </label>
-                                    <button onClick={addEnterpriseToDropdown}>Submit</button>
-                                    {validationError && (
-                                        <div className={clsx('error-container', { 'dark-error': mode === 'dark', 'light-error': mode === 'light' })}>
-                                            <span className="error-icon">⚠️</span>{validationError}
-                                        </div>
-                                    )}
-                                    {successMessage && (
-                                        <div className={clsx(
-                                            'success-container',
-                                            { 'dark-success': mode === 'dark', 'light-success': mode === 'light' }, // Conditional classes
-                                        )}>
-                                            <span className="success-icon">✅</span> {/* Display a checkmark as a success icon */}
-                                            {successMessage}
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </div>
-                    </div>
+                    <AddEnterprise addEnterprise={addEnterprise}/>
 
                     <div className="center-content">
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                    Enterprise:
-                            <select className="uniform-width" onChange={handleSelectEnterprise} value={selectedEnterpriseId}>
-                                {enterprises.map((enterprise) => (
-                                    <option key={enterprise.id} value={enterprise.id}>
-                                        {enterprise.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-
+                        <CustomSelect name="Enterprise" values={enterprises.map(({ id, name }) =>({ value: id, name: { [DEFAULT_LANGUAGE_CODE]: name } }))} selectedValue={selectedEnterpriseId} onChange={handleSelectEnterprise} />
                         <CustomSelect name="Resource category" values={resourceCategories.map(({ Id, Name }) =>({ value: Id, name: Name }))} selectedValue={selectedResourceCategoryId} onChange={handleResourceCategoryIdChange} />
-                        <CustomSelect name="Age Category" values={ageCategories.map(({ Id, Name }) =>({ value: Id, name: Name }))} selectedValue={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange} />
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                 Rate:
-                            <select className="uniform-width" value={selectedRateId ?? ''} onChange={handleRateIdChange}>
-                                {rates.map(({ Id,Name }) => (
-                                    <option key={Id} value={Id}>{getDefaultLanguageTextOrFallback(Name)}</option>
-                                ))}
-                            </select>
-                        </label>
-
+                        <CustomSelect name="Age Category" values={ageCategories.map(({ Id, Name }) =>({ value: Id, name: Name }))} selectedValue={selectedAgeCategoryId} onChange={handleAgeCategoryIdChange} />¨
+                        <CustomSelect name="Rate" values={rates.map(({ Id, Name }) =>({ value: Id, name: Name }))} selectedValue={selectedRateId} onChange={handleRateIdChange} />
                         <button className="uniform-width" onClick={handleLastNameClick}>Random</button>
                         <CustomInput name="LastName" value={inputData.lastName} onChange={(event) => handleOnDateChange('lastName', event)}/>
                         <CustomInput name="Email" value={inputData.email} onChange={(event) => handleOnDateChange('email', event)}/>

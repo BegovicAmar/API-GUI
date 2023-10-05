@@ -107,6 +107,7 @@ interface ConfigurationOption {
 interface Enterprise {
     Id: string;
     IanaTimeZoneIdentifier: string;
+    Name: Record<string, string>;
 }
 interface BookingEngine {
     Id: string;
