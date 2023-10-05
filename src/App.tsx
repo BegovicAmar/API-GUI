@@ -417,7 +417,7 @@ function App() {
                             : renderReservations(reservationDetails)}
                     </div>
                     {jsonData && (
-                        <div
+                        <button
                             className={isQRZoomed ? 'qr-zoomed-container' : ''}
                             onClick={() => setQRZoomed(!isQRZoomed)}
                         >
@@ -430,7 +430,7 @@ function App() {
                             >
                                 <QRCode value={jsonData} />
                             </div>
-                        </div>
+                        </button>
                     )}
                 </>
             )}
