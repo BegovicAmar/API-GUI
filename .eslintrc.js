@@ -61,11 +61,7 @@ module.exports = {
         'no-use-before-define': ['off'],
         'no-var': ['off'],
         'no-void': ['off'], // ['error', { allowAsStatement: true }],
-        'operator-linebreak': [
-            'error',
-            'after',
-            { overrides: { '?': 'ignore', ':': 'ignore' } },
-        ],
+        'operator-linebreak': ['error', 'after', { overrides: { '?': 'ignore', ':': 'ignore' } }],
         'prefer-destructuring': ['error', { object: true, array: false }],
         'prefer-template': ['off'],
         'vars-on-top': ['off'],
@@ -113,14 +109,8 @@ module.exports = {
         'jsx-a11y/click-events-have-key-events': ['warn'],
         'jsx-a11y/no-static-element-interactions': ['warn'],
 
-        'react/default-props-match-prop-types': [
-            'error',
-            { allowRequiredDefaults: true },
-        ],
-        'react/jsx-handler-names': [
-            'error',
-            { eventHandlerPrefix: 'handle', eventHandlerPropPrefix: 'on' },
-        ],
+        'react/default-props-match-prop-types': ['error', { allowRequiredDefaults: true }],
+        'react/jsx-handler-names': ['error', { eventHandlerPrefix: 'handle', eventHandlerPropPrefix: 'on' }],
         'react/jsx-filename-extension': ['off'],
         'react/jsx-curly-spacing': ['error', 'never'],
         'react/no-danger': ['error'],
