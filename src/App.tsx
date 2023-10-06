@@ -351,7 +351,6 @@ function App() {
                             selectedValue={selectedAgeCategoryId}
                             onChange={handleAgeCategoryIdChange}
                         />
-                        ¨
                         <CustomSelect
                             name="Rate"
                             values={rates.map(({ Id, Name }) => ({
