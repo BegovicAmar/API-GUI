@@ -28,7 +28,8 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
             try {
                 const response = await fetchEnterpriseConfiguration(idValue);
                 const enterpriseName = getDefaultLanguageTextOrFallback(response.Enterprises[0].Name);
-                addEnterprise({ id: idValue, name: enterpriseName });
+                const enterpriseId = response.Enterprises[0].Id;
+                addEnterprise({ id: enterpriseId, name: enterpriseName });
                 setSuccessMessage(`Enterprise "${enterpriseName}" added successfully`);
                 setTimeout(() => {
                     setSuccessMessage(null);
@@ -65,7 +66,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                 {showHiddenFields && (
                     <>
                         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                            EnterpriseID:
+                            EnterpriseID/ConfigurationId:
                             <input className="uniform-width" type="text" ref={enterpriseIDRef} />
                         </label>
                         <button onClick={addEnterpriseToDropdown}>Submit</button>

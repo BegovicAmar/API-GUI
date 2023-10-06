@@ -45,10 +45,6 @@ const authCall = async <T>(endpoint: string, payload: T) => {
         body: JSON.stringify({ ...authProps, ...payload }),
     });
 
-    if (!responseMeta.ok) {
-        throw new Error(`API returned status code ${responseMeta.status}`);
-    }
-
     try {
         return await responseMeta.json();
     } catch (error) {

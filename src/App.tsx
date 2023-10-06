@@ -192,6 +192,7 @@ function App() {
         setErrorMessage(null);
         setReservationDetails(null);
         setIsLoading(true);
+
         try {
             const selectedEnterprise = configurationData?.Enterprises?.find(
                 (enterprise) => enterprise.Id === selectedEnterpriseId
@@ -210,7 +211,8 @@ function App() {
             const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
 
             const rateId = selectedRateId || (rates.length > 0 ? rates[0].Id : 'fd666d4c-1472-4a61-b490-aeda00cd7e3a');
-
+            // eslint-disable-next-line no-debugger
+            debugger;
             const reservation = createSingleReservation({
                 Identifier: Math.random().toString(),
                 StartUtc: startMoment.toISOString(),
@@ -261,8 +263,9 @@ function App() {
             };
 
             setReservationDetails(enhancedResponse);
-        } catch (err) {
-            console.error(err, 'CATCH');
+        } catch (err: any) {
+            setErrorMessage(err.message);
+            setIsLoading(false);
         } finally {
             setIsLoading(false);
         }
