@@ -5,10 +5,24 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ThemeProvider } from './providers/ThemeProvider';
 
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
+
+const router = createBrowserRouter([
+    {
+        path: '/',
+        element: <App />,
+    },
+    {
+        path: '/cr/:enterpriseId',
+        element: <App />,
+    },
+]);
+
 root.render(
     <ThemeProvider>
-        <App />
+        <RouterProvider router={router} />
     </ThemeProvider>
 );
 

@@ -90,6 +90,11 @@ export const isSuccessfulReservationGroupResponse = (
 ): response is ReservationsGroupCreateResponse => {
     return 'Reservations' in response;
 };
+export const isSuccessfulConfigurationResponse = (
+    response: ConfigurationGetResponse | FailedResponse
+): response is ConfigurationGetResponse => {
+    return 'BookingEngines' in response;
+};
 
 export const fetchCreateReservation = async (
     payload: CreateReservationGroupPayload
@@ -106,12 +111,12 @@ interface ConfigurationOption {
     PrimaryId: string;
 }
 
-interface Enterprise {
+export interface Enterprise {
     Id: string;
     IanaTimeZoneIdentifier: string;
     Name: Record<string, string>;
 }
-interface BookingEngine {
+export interface BookingEngine {
     Id: string;
     ServiceId: string;
 }
@@ -129,7 +134,9 @@ export interface ConfigurationGetResponse {
     AgeCategories: AgeCategory[];
 }
 
-export const fetchConfiguration = async (payload: ConfigurationOption): Promise<ConfigurationGetResponse> => {
+export const fetchConfiguration = async (
+    payload: ConfigurationOption
+): Promise<ConfigurationGetResponse | FailedResponse> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/configurations/get`, payload);
 };
 

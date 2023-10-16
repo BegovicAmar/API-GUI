@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
 import { useThemeContextValue } from '../hooks/useThemeValue';
-import { fetchEnterpriseConfiguration } from '../api';
+import { fetchEnterpriseConfiguration, isSuccessfulConfigurationResponse } from '../api';
 import { getDefaultLanguageTextOrFallback } from '../utils';
 
 export interface PoorEnterprise {
@@ -27,6 +27,11 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
         if (idValue) {
             try {
                 const response = await fetchEnterpriseConfiguration(idValue);
+                if (!isSuccessfulConfigurationResponse(response)) {
+                    console.error('Error validating EnterpriseID:', response.Message);
+                    setValidationError('Invalid EnterpriseID.');
+                    return;
+                }
                 const enterpriseName = getDefaultLanguageTextOrFallback(response.Enterprises[0].Name);
                 const enterpriseId = response.Enterprises[0].Id;
                 addEnterprise({ id: enterpriseId, name: enterpriseName });
