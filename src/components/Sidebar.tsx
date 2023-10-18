@@ -19,11 +19,9 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
 
         adjustSidebarPosition();
 
-        // Adjust position on window resize
         window.addEventListener('resize', adjustSidebarPosition);
 
         return () => {
-            // Cleanup the event listener
             window.removeEventListener('resize', adjustSidebarPosition);
         };
     }, []);

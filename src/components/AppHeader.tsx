@@ -5,7 +5,7 @@ import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
 type AppHeaderProps = {
     mode: 'dark' | 'light';
     title: string;
-    setTheme: (mode: 'dark' | 'light') => void; // Add this prop
+    setTheme: (mode: 'dark' | 'light') => void;
 };
 
 const AppHeader: React.FC<AppHeaderProps> = ({ mode, title, setTheme }) => {
