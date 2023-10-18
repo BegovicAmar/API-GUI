@@ -31,6 +31,7 @@ import { DEFAULT_LANGUAGE_CODE } from './constants';
 import { AddEnterprise, PoorEnterprise } from './components/AddEnterprise';
 import { Link, useParams } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import AppHeader from './components/AppHeader';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -396,6 +397,7 @@ function App() {
                 )
             ) : (
                 <>
+                    <AppHeader mode={mode} title="My App" />
                     <Sidebar mode={mode} />
 
                     <div className="dark-mode-toggle-button">

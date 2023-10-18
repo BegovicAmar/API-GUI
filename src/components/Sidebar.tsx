@@ -7,31 +7,29 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
     useEffect(() => {
-        const sidebarToggleButton = document.querySelector('.sidebar-toggle-button') as HTMLElement;
-        const sidebarMenu = document.querySelector('.sidebar-menu') as HTMLElement;
+        const adjustSidebarPosition = () => {
+            const header = document.querySelector('.app-header-container') as HTMLElement;
+            const sidebar = document.querySelector('.sidebar-menu') as HTMLElement;
 
-        const handleToggle = () => {
-            if (sidebarMenu.style.left === '-250px' || sidebarMenu.style.left === '') {
-                sidebarMenu.style.left = '0px';
-            } else {
-                sidebarMenu.style.left = '-250px';
+            if (header && sidebar) {
+                const headerHeight = header.offsetHeight;
+                sidebar.style.top = `${headerHeight}px`;
             }
         };
 
-        if (sidebarToggleButton && sidebarMenu) {
-            sidebarToggleButton.addEventListener('click', handleToggle);
-        }
+        adjustSidebarPosition();
+
+        // Adjust position on window resize
+        window.addEventListener('resize', adjustSidebarPosition);
 
         return () => {
-            if (sidebarToggleButton) {
-                sidebarToggleButton.removeEventListener('click', handleToggle);
-            }
+            // Cleanup the event listener
+            window.removeEventListener('resize', adjustSidebarPosition);
         };
     }, []);
 
     return (
         <div className="sidebar-container">
-            <button className="sidebar-toggle-button">☰</button>
             <nav
                 className={clsx('sidebar-menu', {
                     'dark-sidebar': mode === 'dark',
