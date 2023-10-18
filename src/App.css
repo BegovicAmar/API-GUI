@@ -249,3 +249,7 @@ button.uniform-width {
 .light-mode-text {
     color: black; /* Light mode text color */
 }
+
+a > span {
+    display: block;
+}

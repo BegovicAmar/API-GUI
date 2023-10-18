@@ -30,6 +30,7 @@ import { CustomSelect } from './components/CustomSelect';
 import { DEFAULT_LANGUAGE_CODE } from './constants';
 import { AddEnterprise, PoorEnterprise } from './components/AddEnterprise';
 import { Link, useParams } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -119,19 +120,6 @@ function App() {
         startUtc: getTodaysDate(),
         endUtc: getEndDateFromStartDate(getTodaysDate()),
     });
-
-    const sidebarToggleButton = document.querySelector('.sidebar-toggle-button') as HTMLElement;
-    const sidebarMenu = document.querySelector('.sidebar-menu') as HTMLElement;
-
-    if (sidebarToggleButton && sidebarMenu) {
-        sidebarToggleButton.addEventListener('click', () => {
-            if (sidebarMenu.style.left === '0px' || sidebarMenu.style.left === '') {
-                sidebarMenu.style.left = '-250px';
-            } else {
-                sidebarMenu.style.left = '0px';
-            }
-        });
-    }
 
     const createReservation = useCallback(
         async ({ ageCategoryId, resourceCategoryId, enterprises, bookingEngines }: CreateReservationOptions) => {
@@ -408,33 +396,8 @@ function App() {
                 )
             ) : (
                 <>
-                    <div className="sidebar-container">
-                        <nav
-                            className={clsx('sidebar-menu', {
-                                'dark-sidebar': mode === 'dark',
-                                'light-sidebar': mode === 'light',
-                            })}
-                        >
-                            <ul>
-                                <li>
-                                    <a
-                                        href="#BEAddReservation"
-                                        className={mode === 'dark' ? 'dark-mode-text' : 'light-mode-text'}
-                                    >
-                                        Booking Engine Add Reservation
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href="#BEAddMultipleReservations"
-                                        className={mode === 'dark' ? 'dark-mode-text' : 'light-mode-text'}
-                                    >
-                                        Booking Engine Add Multiple Reservations
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
+                    <Sidebar mode={mode} />
+
                     <div className="dark-mode-toggle-button">
                         <DarkModeToggle
                             mode={mode}
