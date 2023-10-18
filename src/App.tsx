@@ -397,7 +397,7 @@ function App() {
                 )
             ) : (
                 <>
-                    <AppHeader mode={mode} title="My App" />
+                    <AppHeader mode={mode} title="API Toolbelt" />
                     <Sidebar mode={mode} />
 
                     <div className="dark-mode-toggle-button">
