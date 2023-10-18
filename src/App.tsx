@@ -412,9 +412,8 @@ function App() {
                             }}
                         />
                     </div>
-                    <AddEnterprise addEnterprise={addEnterprise} />
-
                     <div className="center-content">
+                        <AddEnterprise addEnterprise={addEnterprise} />
                         <CustomSelect
                             name="Enterprise"
                             values={enterprises.map(({ id, name }) => ({

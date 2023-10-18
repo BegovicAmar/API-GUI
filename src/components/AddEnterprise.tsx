@@ -65,7 +65,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
     }, [validationError]);
 
     return (
-        <div className="fields-wrapper">
+        <div>
             <button onClick={() => setShowHiddenFields(!showHiddenFields)}>Add Enterprise</button>
             <div className="center-content">
                 {showHiddenFields && (
