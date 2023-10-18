@@ -1,15 +1,18 @@
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
 import './App.css';
 import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
     AgeCategory,
+    BookingEngine,
     ConfigurationGetResponse,
     CreateReservationGroupPayload,
     createSingleReservation,
+    Enterprise,
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
     fetchRateIds,
     fetchResourceCategories,
+    isSuccessfulConfigurationResponse,
     isSuccessfulReservationGroupResponse,
     Rate,
     RatePayload,
@@ -26,6 +29,7 @@ import { CustomInput } from './components/CustomInput';
 import { CustomSelect } from './components/CustomSelect';
 import { DEFAULT_LANGUAGE_CODE } from './constants';
 import { AddEnterprise, PoorEnterprise } from './components/AddEnterprise';
+import { Link, useParams } from 'react-router-dom';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -57,6 +61,8 @@ const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupC
 interface CreateReservationOptions {
     ageCategoryId: string;
     resourceCategoryId: string;
+    bookingEngines?: BookingEngine[];
+    enterprises?: Enterprise[];
 }
 
 const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse | null) => {
@@ -71,19 +77,29 @@ const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupC
     };
     return JSON.stringify(formattedData);
 };
-
+// interface WithEnterpriseId {
+//     enterpriseId?: string;
+// }
 function App() {
     const [isLoading, setIsLoading] = useState(false);
     const { setTheme, value: mode } = useThemeContext();
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-    const [selectedEnterpriseId, selectEnterprise] = useState<string>('8a51f050-8467-4e92-84d5-abc800c810b8');
+
+    const params = useParams();
+
+    const hasEnterpriseIdInUrl = params?.['enterpriseId'] != null;
+    const [shouldCreateReservation, setShouldCreateReservation] = useState<boolean>(hasEnterpriseIdInUrl);
+    const [isReservationBeingCreated, setIsBeingCreated] = useState<boolean>(false);
+
+    const [selectedEnterpriseId, selectEnterprise] = useState<string>(
+        params['enterpriseId'] ?? '8a51f050-8467-4e92-84d5-abc800c810b8'
+    );
     const [ageCategories, setAgeCategories] = useState<AgeCategory[]>([]);
     const [selectedAgeCategoryId, setSelectedAgeCategoryId] = useState<string | null>(null);
     const [resourceCategories, setResourceCategories] = useState<ResourceCategory[]>([]);
     const [selectedResourceCategoryId, setSelectedResourceCategoryId] = useState<string | null>(null);
     const [rates, setRates] = useState<Rate[]>([]);
-
     const [enterprises, setEnterprises] = useState<PoorEnterprise[]>([
         { id: '8a51f050-8467-4e92-84d5-abc800c810b8', name: 'Bespin' },
         {
@@ -104,67 +120,191 @@ function App() {
         endUtc: getEndDateFromStartDate(getTodaysDate()),
     });
 
-    useEffect(() => {
-        try {
-            const configDataPromise = fetchEnterpriseConfiguration(selectedEnterpriseId);
-            configDataPromise.then((configData) => {
-                setConfigurationData(configData);
-                setAgeCategories(configData.AgeCategories);
+    const createReservation = useCallback(
+        async ({ ageCategoryId, resourceCategoryId, enterprises, bookingEngines }: CreateReservationOptions) => {
+            setErrorMessage(null);
+            setReservationDetails(null);
+            setIsLoading(true);
 
-                if (
-                    !selectedAgeCategoryId ||
-                    !configData.AgeCategories.find((cat) => cat.Id === selectedAgeCategoryId)
-                ) {
-                    setSelectedAgeCategoryId(configData.AgeCategories[0]?.Id || null);
+            try {
+                const selectedEnterprise = enterprises?.find((enterprise) => enterprise.Id === selectedEnterpriseId);
+                const selectedConfiguration = bookingEngines?.[0];
+
+                const timezone = selectedEnterprise?.IanaTimeZoneIdentifier;
+
+                if (!timezone || selectedConfiguration?.Id == null) {
+                    console.error('Timezone or configurationId is missing');
+                    setIsLoading(false);
+                    return;
                 }
 
-                if (configData?.BookingEngines?.[0]) {
-                    const serviceId = configData?.BookingEngines?.[0].ServiceId;
-                    const bookingEngineId = configData?.BookingEngines?.[0].Id;
+                const startMoment = moment.tz(`${inputData.startUtc}T00:00:00`, timezone);
+                const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
 
-                    const resourceCategoryPromise = fetchResourceCategories({
-                        ServiceId: serviceId,
-                    });
-                    resourceCategoryPromise.then((resourceCategoryResponse) => {
-                        setResourceCategories(resourceCategoryResponse.ResourceCategories);
-                        if (resourceCategoryResponse.ResourceCategories.length > 0) {
-                            setSelectedResourceCategoryId(resourceCategoryResponse.ResourceCategories[0].Id);
+                const rateId = selectedRateId || rates[0].Id;
 
-                            const timezone = configData?.Enterprises?.find(
-                                (enterprise) => enterprise.Id === selectedEnterpriseId
-                            )?.IanaTimeZoneIdentifier;
+                const reservation = createSingleReservation({
+                    Identifier: Math.random().toString(),
+                    StartUtc: startMoment.toISOString(),
+                    EndUtc: endMoment.toISOString(),
+                    OccupancyData: [
+                        {
+                            AgeCategoryId: ageCategoryId,
+                            PersonCount: 1,
+                        },
+                    ],
+                    ProductIds: [],
+                    RateId: rateId,
+                    RoomCategoryId: resourceCategoryId,
+                    Notes: null,
+                });
 
-                            const startMoment = timezone
-                                ? moment.tz(`${inputData.startUtc}T00:00:00`, timezone).toISOString()
-                                : inputData.startUtc;
-                            const endMoment = timezone
-                                ? moment.tz(`${inputData.endUtc}T00:00:00`, timezone).toISOString()
-                                : inputData.endUtc;
+                const newPayload: CreateReservationGroupPayload = {
+                    ConfigurationId: selectedConfiguration?.Id,
+                    CreditCardData: null, // TOOD maybe we donth have to use them
+                    Reservations: [reservation],
+                    Customer: {
+                        Email: inputData.email,
+                        LastName: inputData.lastName,
+                    },
+                    HotelId: selectedEnterpriseId,
+                };
 
-                            const ratePayload: RatePayload = {
-                                EnterpriseId: selectedEnterpriseId,
-                                ServiceId: serviceId,
-                                BookingEngineId: bookingEngineId,
-                                CategoryId: resourceCategoryResponse.ResourceCategories[0].Id,
-                                AgeCategoryId: configData.AgeCategories[0].Id,
-                                StartUtc: startMoment,
-                                EndUtc: endMoment,
-                            };
-                            fetchRateIds(ratePayload).then((rateResponse) => {
-                                setRates(rateResponse.Rates);
-                                setSelectedRateId(rateResponse.Rates[0].Id);
-                            });
-                        }
-                    });
+                const responseJson = await fetchCreateReservation(newPayload);
+                if (!isSuccessfulReservationGroupResponse(responseJson)) {
+                    setErrorMessage(responseJson.Message);
+                    setIsLoading(false);
+                    return;
                 }
-            });
-        } catch (error) {
-            console.error('Error fetching data', error);
-        }
-    }, [inputData.endUtc, inputData.startUtc, selectedAgeCategoryId, selectedEnterpriseId]);
 
+                const enhancedReservations = responseJson.Reservations.map((reservation) => ({
+                    ...reservation,
+                    LastName: inputData.lastName,
+                }));
+
+                const enhancedReservationGroups = responseJson.ReservationGroups.map((group) => ({
+                    ...group,
+                }));
+
+                const enhancedResponse = {
+                    ...responseJson,
+                    Reservations: enhancedReservations,
+                    ReservationGroups: enhancedReservationGroups,
+                };
+                setShouldCreateReservation(false);
+                setReservationDetails(enhancedResponse);
+            } catch (err: any) {
+                setErrorMessage(err.message);
+                setIsLoading(false);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        [
+            inputData.email,
+            inputData.endUtc,
+            inputData.lastName,
+            inputData.startUtc,
+            rates,
+            selectedEnterpriseId,
+            selectedRateId,
+        ]
+    );
+
+    useEffect(
+        () => {
+            try {
+                const configDataPromise = fetchEnterpriseConfiguration(selectedEnterpriseId);
+                configDataPromise.then((configData) => {
+                    if (!isSuccessfulConfigurationResponse(configData)) {
+                        setErrorMessage(configData.Message);
+                        setIsLoading(false);
+                        return;
+                    }
+                    setConfigurationData(configData);
+                    setAgeCategories(configData.AgeCategories);
+
+                    if (
+                        !selectedAgeCategoryId ||
+                        !configData.AgeCategories.find((cat) => cat.Id === selectedAgeCategoryId)
+                    ) {
+                        setSelectedAgeCategoryId(configData.AgeCategories[0]?.Id || null);
+                    }
+
+                    if (configData?.BookingEngines?.[0]) {
+                        const serviceId = configData?.BookingEngines?.[0].ServiceId;
+                        const bookingEngineId = configData?.BookingEngines?.[0].Id;
+
+                        const resourceCategoryPromise = fetchResourceCategories({
+                            ServiceId: serviceId,
+                        });
+                        resourceCategoryPromise.then((resourceCategoryResponse) => {
+                            setResourceCategories(resourceCategoryResponse.ResourceCategories);
+                            if (resourceCategoryResponse.ResourceCategories.length > 0) {
+                                setSelectedResourceCategoryId(resourceCategoryResponse.ResourceCategories[0].Id);
+
+                                const timezone = configData?.Enterprises?.find(
+                                    (enterprise) => enterprise.Id === selectedEnterpriseId
+                                )?.IanaTimeZoneIdentifier;
+
+                                const startMoment = timezone
+                                    ? moment.tz(`${inputData.startUtc}T00:00:00`, timezone).toISOString()
+                                    : inputData.startUtc;
+                                const endMoment = timezone
+                                    ? moment.tz(`${inputData.endUtc}T00:00:00`, timezone).toISOString()
+                                    : inputData.endUtc;
+
+                                const ratePayload: RatePayload = {
+                                    EnterpriseId: selectedEnterpriseId,
+                                    ServiceId: serviceId,
+                                    BookingEngineId: bookingEngineId,
+                                    CategoryId: resourceCategoryResponse.ResourceCategories[0].Id,
+                                    AgeCategoryId: configData.AgeCategories[0].Id,
+                                    StartUtc: startMoment,
+                                    EndUtc: endMoment,
+                                };
+                                fetchRateIds(ratePayload).then((rateResponse) => {
+                                    setRates(rateResponse.Rates);
+                                    setSelectedRateId(rateResponse.Rates[0].Id);
+                                });
+                            }
+                        });
+                    }
+                });
+            } catch (error) {
+                console.error('Error fetching data', error);
+            }
+        },
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        [inputData.endUtc, inputData.startUtc, selectedAgeCategoryId, selectedEnterpriseId, shouldCreateReservation]
+    );
     const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
-
+    useEffect(() => {
+        if (
+            shouldCreateReservation &&
+            selectedAgeCategoryId != null &&
+            selectedResourceCategoryId != null &&
+            !isReservationBeingCreated
+        ) {
+            setIsBeingCreated(true);
+            createReservation({
+                ageCategoryId: selectedAgeCategoryId,
+                resourceCategoryId: selectedResourceCategoryId,
+                bookingEngines: configurationData?.BookingEngines,
+                enterprises: configurationData?.Enterprises,
+            }).finally(() => {
+                setIsBeingCreated(false);
+            });
+        }
+    }, [
+        configurationData?.BookingEngines,
+        configurationData?.Enterprises,
+        createReservation,
+        isReservationBeingCreated,
+        selectedAgeCategoryId,
+        selectedResourceCategoryId,
+        shouldCreateReservation,
+    ]);
     const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(event.target.value);
     };
@@ -186,85 +326,6 @@ function App() {
                 ...inputData,
                 [name]: newDate,
             });
-        }
-    };
-    const createReservation = async ({ ageCategoryId, resourceCategoryId }: CreateReservationOptions) => {
-        setErrorMessage(null);
-        setReservationDetails(null);
-        setIsLoading(true);
-        try {
-            const selectedEnterprise = configurationData?.Enterprises?.find(
-                (enterprise) => enterprise.Id === selectedEnterpriseId
-            );
-            const selectedConfiguration = configurationData?.BookingEngines?.[0];
-
-            const timezone = selectedEnterprise?.IanaTimeZoneIdentifier;
-
-            if (!timezone || selectedConfiguration?.Id == null) {
-                console.error('Timezone or configurationId is missing');
-                setIsLoading(false);
-                return;
-            }
-
-            const startMoment = moment.tz(`${inputData.startUtc}T00:00:00`, timezone);
-            const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
-
-            const rateId = selectedRateId || (rates.length > 0 ? rates[0].Id : 'fd666d4c-1472-4a61-b490-aeda00cd7e3a');
-
-            const reservation = createSingleReservation({
-                Identifier: Math.random().toString(),
-                StartUtc: startMoment.toISOString(),
-                EndUtc: endMoment.toISOString(),
-                OccupancyData: [
-                    {
-                        AgeCategoryId: ageCategoryId,
-                        PersonCount: 1,
-                    },
-                ],
-                ProductIds: [],
-                RateId: rateId,
-                RoomCategoryId: resourceCategoryId,
-                Notes: null,
-            });
-
-            const newPayload: CreateReservationGroupPayload = {
-                ConfigurationId: selectedConfiguration?.Id,
-                CreditCardData: null, // TOOD maybe we donth have to use them
-                Reservations: [reservation],
-                Customer: {
-                    Email: inputData.email,
-                    LastName: inputData.lastName,
-                },
-                HotelId: selectedEnterpriseId,
-            };
-
-            const responseJson = await fetchCreateReservation(newPayload);
-            if (!isSuccessfulReservationGroupResponse(responseJson)) {
-                setErrorMessage(responseJson.Message);
-                setIsLoading(false);
-                return;
-            }
-
-            const enhancedReservations = responseJson.Reservations.map((reservation) => ({
-                ...reservation,
-                LastName: inputData.lastName,
-            }));
-
-            const enhancedReservationGroups = responseJson.ReservationGroups.map((group) => ({
-                ...group,
-            }));
-
-            const enhancedResponse = {
-                ...responseJson,
-                Reservations: enhancedReservations,
-                ReservationGroups: enhancedReservationGroups,
-            };
-
-            setReservationDetails(enhancedResponse);
-        } catch (err) {
-            console.error(err, 'CATCH');
-        } finally {
-            setIsLoading(false);
         }
     };
 
@@ -306,7 +367,32 @@ function App() {
         <div className={clsx('App', { dark: mode === 'dark' })}>
             {isLoading && <LoaderComponent type="reservation" />}
             {selectedAgeCategoryId == null || selectedResourceCategoryId == null || selectedRateId == null ? (
-                <LoaderComponent type="configuration" />
+                errorMessage != null ? (
+                    <>
+                        <div
+                            className={clsx('error-container', {
+                                'dark-error': mode === 'dark',
+                                'light-error': mode === 'light',
+                            })}
+                        >
+                            <span className="error-icon">⚠️</span>{' '}
+                            {/* You can replace with an actual error icon if you have one */}
+                            {errorMessage}
+                        </div>
+                        <Link
+                            to="/"
+                            onClick={() => {
+                                setErrorMessage(null);
+                                selectEnterprise('8a51f050-8467-4e92-84d5-abc800c810b8');
+                                setReservationDetails(null);
+                            }}
+                        >
+                            Reset
+                        </Link>
+                    </>
+                ) : (
+                    <LoaderComponent type="configuration" />
+                )
             ) : (
                 <>
                     <div className="dark-mode-toggle-button">
@@ -389,6 +475,8 @@ function App() {
                                 createReservation({
                                     ageCategoryId: selectedAgeCategoryId,
                                     resourceCategoryId: selectedResourceCategoryId,
+                                    bookingEngines: configurationData?.BookingEngines,
+                                    enterprises: configurationData?.Enterprises,
                                 })
                             }
                         >

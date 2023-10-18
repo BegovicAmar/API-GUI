@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 import React, { useEffect, useRef, useState } from 'react';
 import { useThemeContextValue } from '../hooks/useThemeValue';
-import { fetchEnterpriseConfiguration } from '../api';
+import { fetchEnterpriseConfiguration, isSuccessfulConfigurationResponse } from '../api';
 import { getDefaultLanguageTextOrFallback } from '../utils';
 
 export interface PoorEnterprise {
@@ -27,8 +27,14 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
         if (idValue) {
             try {
                 const response = await fetchEnterpriseConfiguration(idValue);
+                if (!isSuccessfulConfigurationResponse(response)) {
+                    console.error('Error validating EnterpriseID:', response.Message);
+                    setValidationError('Invalid EnterpriseID.');
+                    return;
+                }
                 const enterpriseName = getDefaultLanguageTextOrFallback(response.Enterprises[0].Name);
-                addEnterprise({ id: idValue, name: enterpriseName });
+                const enterpriseId = response.Enterprises[0].Id;
+                addEnterprise({ id: enterpriseId, name: enterpriseName });
                 setSuccessMessage(`Enterprise "${enterpriseName}" added successfully`);
                 setTimeout(() => {
                     setSuccessMessage(null);
@@ -65,7 +71,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                 {showHiddenFields && (
                     <>
                         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                            EnterpriseID:
+                            EnterpriseID/ConfigurationId:
                             <input className="uniform-width" type="text" ref={enterpriseIDRef} />
                         </label>
                         <button onClick={addEnterpriseToDropdown}>Submit</button>
