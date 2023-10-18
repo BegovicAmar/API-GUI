@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import clsx from 'clsx';
+import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
 
 type AppHeaderProps = {
-    mode: 'dark' | 'light'; // You can pass the theme mode as a prop
-    title: string; // App title or brand name
+    mode: 'dark' | 'light';
+    title: string;
+    setTheme: (mode: 'dark' | 'light') => void; // Add this prop
 };
 
-const AppHeader: React.FC<AppHeaderProps> = ({ mode, title }) => {
+const AppHeader: React.FC<AppHeaderProps> = ({ mode, title, setTheme }) => {
     useEffect(() => {
         const sidebarToggleButton = document.querySelector('.sidebar-toggle-button') as HTMLElement;
         const sidebarMenu = document.querySelector('.sidebar-menu') as HTMLElement;
@@ -39,7 +41,25 @@ const AppHeader: React.FC<AppHeaderProps> = ({ mode, title }) => {
                     'light-header': mode === 'light',
                 })}
             >
-                <span className={mode === 'dark' ? 'dark-mode-text' : 'light-mode-text'}>{title}</span>
+                <span
+                    className={clsx('app-header-title', {
+                        'dark-mode-text': mode === 'dark',
+                        'light-mode-text': mode === 'light',
+                    })}
+                >
+                    {title}
+                </span>
+                <div className="dark-mode-toggle-button">
+                    <DarkModeToggle
+                        mode={mode}
+                        dark="Dark"
+                        light="Light"
+                        size="sm"
+                        onChange={(newMode) => {
+                            setTheme(newMode);
+                        }}
+                    />
+                </div>
             </div>
         </div>
     );

@@ -20,7 +20,6 @@ import {
     ResourceCategory,
 } from './api';
 import clsx from 'clsx';
-import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
 import LoaderComponent from './components/LoaderComponent';
 import moment from 'moment-timezone';
@@ -397,21 +396,8 @@ function App() {
                 )
             ) : (
                 <>
-                    <AppHeader mode={mode} title="API Toolbelt" />
+                    <AppHeader mode={mode} title="API Toolbelt" setTheme={setTheme} />
                     <Sidebar mode={mode} />
-
-                    <div className="dark-mode-toggle-button">
-                        <DarkModeToggle
-                            mode={mode}
-                            dark="Dark"
-                            light="Light"
-                            size="sm"
-                            onChange={(mode) => {
-                                setTheme(mode);
-                                // window.localStorage.setItem('themeMode', mode);
-                            }}
-                        />
-                    </div>
                     <div className="center-content">
                         <AddEnterprise addEnterprise={addEnterprise} />
                         <CustomSelect
