@@ -97,6 +97,12 @@
     left: 265px;
 }
 
+.sidebar-toggle-button {
+    position: fixed;
+    top: 10px;
+    left: 450px;
+}
+
 .uniform-width {
     background-color: white;
     color: black;
@@ -179,13 +185,13 @@ button.uniform-width {
 }
 
 .dark-success {
-    background-color: #003300; /* Dark green background for dark mode */
-    color: #00cc00; /* Green text for dark mode */
+    background-color: #003300; 
+    color: #00cc00;
 }
 
 .light-success {
-    background-color: #e6ffe6; /* Light green background for light mode */
-    color: #003300; /* Dark green text for light mode */
+    background-color: #e6ffe6; 
+    color: #003300; 
 }
 
 .success-icon {
@@ -203,11 +209,11 @@ button.uniform-width {
     background-color: #333;
     position: fixed;
     top: 0;
-    left: 0;
+    left: -250px;
     height: 100%;
     width: 250px;
-    transition: 0.3s; /* Smooth transition effect */
-    overflow-y: auto; /* Add a scrollbar if needed */
+    transition: left 0.3s ease-in-out; 
+    overflow-y: auto; 
     border-right: 1px solid #555;
     padding: 10px;
 }
@@ -233,21 +239,21 @@ button.uniform-width {
 
 .dark-sidebar {
     background-color: #333;
-    color: white; /* Text color for dark mode */
+    color: white; 
 }
 
 
 .light-sidebar {
     background-color: #f5f5f5;
-    color: black; /* Text color for light mode */
+    color: black;
 }
 
 .dark-mode-text {
-    color: white; /* Dark mode text color */
+    color: white; 
 }
 
 .light-mode-text {
-    color: black; /* Light mode text color */
+    color: black; 
 }
 
 a > span {
