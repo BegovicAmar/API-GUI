@@ -93,11 +93,9 @@ function App() {
         []
     );
     const params = useParams();
-
     const hasEnterpriseIdInUrl = params?.['enterpriseId'] != null;
     const [shouldCreateReservation, setShouldCreateReservation] = useState<boolean>(hasEnterpriseIdInUrl);
     const [isReservationBeingCreated, setIsBeingCreated] = useState<boolean>(false);
-
     const [selectedEnterpriseId, selectEnterprise] = useState<string>(
         params['enterpriseId'] ?? '8a51f050-8467-4e92-84d5-abc800c810b8'
     );
@@ -449,7 +447,7 @@ function App() {
                                     : undefined;
                                 return {
                                     value: Id,
-                                    name: Name, // Directly use Name here
+                                    name: Name,
                                     availability: availability,
                                 };
                             })}
