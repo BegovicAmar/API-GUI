@@ -184,3 +184,24 @@ interface RateResponse {
 export const fetchRateIds = async (payload: RatePayload): Promise<RateResponse> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/services/getPricing`, payload);
 };
+
+export interface AvailabilityPayload {
+    EnterpriseId: string;
+    ServiceId: string;
+    CategoryId: string[];
+    StartUtc: string;
+    EndUtc: string;
+}
+
+export interface Availability {
+    CategoryId: string;
+    Availability: number;
+}
+
+interface AvailabilityResponse {
+    CategoryId: Record<string, number>;
+}
+
+export const fetchAvailability = async (payload: AvailabilityPayload): Promise<AvailabilityResponse> => {
+    return authCall(`${ENV_URL}/api/bookingEngine/v1/services/getAvailability`, payload);
+};

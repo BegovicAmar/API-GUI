@@ -3,11 +3,13 @@ import './App.css';
 import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
     AgeCategory,
+    AvailabilityPayload,
     BookingEngine,
     ConfigurationGetResponse,
     CreateReservationGroupPayload,
     createSingleReservation,
     Enterprise,
+    fetchAvailability,
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
     fetchRateIds,
@@ -265,10 +267,31 @@ function App() {
                                     StartUtc: startMoment,
                                     EndUtc: endMoment,
                                 };
-                                fetchRateIds(ratePayload).then((rateResponse) => {
-                                    setRates(rateResponse.Rates);
-                                    setSelectedRateId(rateResponse.Rates[0].Id);
-                                });
+                                fetchRateIds(ratePayload)
+                                    .then((rateResponse) => {
+                                        setRates(rateResponse.Rates);
+                                        setSelectedRateId(rateResponse.Rates[0].Id);
+
+                                        const availabilityPayload: AvailabilityPayload = {
+                                            EnterpriseId: selectedEnterpriseId,
+                                            ServiceId: serviceId,
+                                            CategoryId: [resourceCategoryResponse.ResourceCategories[0].Id],
+                                            StartUtc: startMoment,
+                                            EndUtc: endMoment,
+                                        };
+
+                                        fetchAvailability(availabilityPayload)
+                                            .then((availabilityResponse) => {
+                                                // Handle the availability response as needed
+                                                console.log(availabilityResponse); // Just logging it for now
+                                            })
+                                            .catch((error) => {
+                                                console.error('Error fetching availability', error);
+                                            });
+                                    })
+                                    .catch((error) => {
+                                        console.error('Error fetching rate IDs', error);
+                                    });
                             }
                         });
                     }
