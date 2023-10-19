@@ -531,11 +531,11 @@ function App() {
                         </div>
                     )}
                     <div
-                        style={{ fontSize: '20px', marginTop: '2rem' }}
+                        style={{ fontSize: '20px', marginTop: '1px' }}
                         className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
                     >
                         {reservationDetails === null
-                            ? 'No reservation fetched'
+                            ? 'Click ⬆️ to create reservation'
                             : renderReservations(reservationDetails)}
                     </div>
                     {jsonData && (

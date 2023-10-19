@@ -100,14 +100,21 @@
 }
 
 .uniform-width {
-    background-color: white;
-    color: black;
     width: 200px;
+    cursor: pointer;
+}
+
+input.uniform-width {
+    cursor: text;
 }
 
 button.uniform-width {
     background-color: lightblue;
-    color: black;
+    border: .5px solid black;
+}
+
+button.uniform-width:focus {
+    outline: 2px solid dodgerblue;
 }
 
 .dark .uniform-width {
@@ -118,6 +125,11 @@ button.uniform-width {
 .dark button.uniform-width {
     background-color: #555;
     color: white;
+    border: .5px solid #444; 
+}
+
+.dark button.uniform-width:focus {
+    outline: 2px solid lightblue; 
 }
 
 .dark .dark-mode-label {
