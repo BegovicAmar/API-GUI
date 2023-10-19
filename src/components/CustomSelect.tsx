@@ -5,6 +5,7 @@ import { getDefaultLanguageTextOrFallback } from '../utils';
 interface SelectValue {
     value: string;
     name: Record<string, string>;
+    availability?: string;
 }
 interface CustomInputProps<T> {
     // eslint-disable-next-line no-unused-vars
@@ -21,9 +22,10 @@ export const CustomSelect = ({ selectedValue, name, onChange, values }: CustomIn
         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
             {name}:
             <select className="uniform-width" value={selectedValue} onChange={onChange}>
-                {values.map(({ value, name }) => (
+                {values.map(({ value, name, availability }) => (
                     <option key={value} value={value}>
                         {getDefaultLanguageTextOrFallback(name)}
+                        {availability ? ` (Availability: ${availability})` : ''}
                     </option>
                 ))}
             </select>

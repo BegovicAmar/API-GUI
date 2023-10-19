@@ -89,7 +89,9 @@ function App() {
     const { setTheme, value: mode } = useThemeContext();
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+    const [availabilityData, setAvailabilityData] = useState<Array<{ categoryId: string; lowestAvailability: number }>>(
+        []
+    );
     const params = useParams();
 
     const hasEnterpriseIdInUrl = params?.['enterpriseId'] != null;
@@ -282,13 +284,13 @@ function App() {
 
                                         fetchAvailability(availabilityPayload)
                                             .then((availabilityResponse) => {
-                                                availabilityResponse.CategoryAvailabilities.forEach((category) => {
-                                                    const lowestAvailability = Math.min(...category.Availabilities);
-                                                    console.log(
-                                                        // eslint-disable-next-line max-len
-                                                        `ResourceCategoryId: ${category.CategoryId}, Lowest Availability: ${lowestAvailability}`
-                                                    );
-                                                });
+                                                const newData = availabilityResponse.CategoryAvailabilities.map(
+                                                    (category) => ({
+                                                        categoryId: category.CategoryId,
+                                                        lowestAvailability: Math.min(...category.Availabilities),
+                                                    })
+                                                );
+                                                setAvailabilityData(newData);
                                             })
                                             .catch((error) => {
                                                 console.error('Error fetching availability', error);
@@ -440,10 +442,17 @@ function App() {
                         />
                         <CustomSelect
                             name="Resource category"
-                            values={resourceCategories.map(({ Id, Name }) => ({
-                                value: Id,
-                                name: Name,
-                            }))}
+                            values={resourceCategories.map(({ Id, Name }) => {
+                                const matchedAvailability = availabilityData.find((data) => data.categoryId === Id);
+                                const availability = matchedAvailability
+                                    ? matchedAvailability.lowestAvailability.toString()
+                                    : undefined;
+                                return {
+                                    value: Id,
+                                    name: Name, // Directly use Name here
+                                    availability: availability,
+                                };
+                            })}
                             selectedValue={selectedResourceCategoryId}
                             onChange={handleResourceCategoryIdChange}
                         />
