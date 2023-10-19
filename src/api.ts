@@ -193,13 +193,13 @@ export interface AvailabilityPayload {
     EndUtc: string;
 }
 
-export interface Availability {
+export interface CategoryAvailability {
     CategoryId: string;
-    Availability: number;
+    Availabilities: number[];
 }
 
 interface AvailabilityResponse {
-    CategoryId: Record<string, number>;
+    CategoryAvailabilities: CategoryAvailability[];
 }
 
 export const fetchAvailability = async (payload: AvailabilityPayload): Promise<AvailabilityResponse> => {

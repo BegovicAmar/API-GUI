@@ -282,8 +282,13 @@ function App() {
 
                                         fetchAvailability(availabilityPayload)
                                             .then((availabilityResponse) => {
-                                                // Handle the availability response as needed
-                                                console.log(availabilityResponse); // Just logging it for now
+                                                availabilityResponse.CategoryAvailabilities.forEach((category) => {
+                                                    const lowestAvailability = Math.min(...category.Availabilities);
+                                                    console.log(
+                                                        // eslint-disable-next-line max-len
+                                                        `ResourceCategoryId: ${category.CategoryId}, Lowest Availability: ${lowestAvailability}`
+                                                    );
+                                                });
                                             })
                                             .catch((error) => {
                                                 console.error('Error fetching availability', error);
