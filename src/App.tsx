@@ -282,13 +282,19 @@ function App() {
 
                                         fetchAvailability(availabilityPayload)
                                             .then((availabilityResponse) => {
-                                                const newData = availabilityResponse.CategoryAvailabilities.map(
-                                                    (category) => ({
+                                                const availabilityData =
+                                                    availabilityResponse.CategoryAvailabilities.map((category) => ({
                                                         categoryId: category.CategoryId,
                                                         lowestAvailability: Math.min(...category.Availabilities),
-                                                    })
-                                                );
-                                                setAvailabilityData(newData);
+                                                    }));
+
+                                                const highestAvailabilityCategory = availabilityData.sort(
+                                                    (a, b) => b.lowestAvailability - a.lowestAvailability
+                                                )[0];
+
+                                                setSelectedResourceCategoryId(highestAvailabilityCategory.categoryId);
+
+                                                setAvailabilityData(availabilityData);
                                             })
                                             .catch((error) => {
                                                 console.error('Error fetching availability', error);

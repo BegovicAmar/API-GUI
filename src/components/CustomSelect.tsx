@@ -18,11 +18,17 @@ interface CustomInputProps<T> {
 export const CustomSelect = ({ selectedValue, name, onChange, values }: CustomInputProps<string | number>) => {
     const mode = useThemeContextValue();
 
+    // Sort the values based on availability
+    const sortedValues = [...values].sort((a, b) => {
+        // Convert availability to number and sort in descending order
+        return Number(b.availability) - Number(a.availability);
+    });
+
     return (
         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
             {name}:
             <select className="uniform-width" value={selectedValue} onChange={onChange}>
-                {values.map(({ value, name, availability }) => (
+                {sortedValues.map(({ value, name, availability }) => (
                     <option
                         key={value}
                         value={value}
