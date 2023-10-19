@@ -511,6 +511,7 @@ function App() {
                             >
                                 <QRCode value={jsonData} />
                             </div>
+                            <span>Click QR code to enlarge</span>
                         </button>
                     )}
                 </>

@@ -34,7 +34,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({ mode, title, setTheme }) => {
 
     return (
         <div className="app-header-container">
-            <button className="sidebar-toggle-button">☰</button>
+            <button
+                className={clsx('sidebar-toggle-button', {
+                    'dark-toggle-button': mode === 'dark',
+                    'light-toggle-button': mode === 'light',
+                })}
+            >
+                ☰
+            </button>
+
             <div
                 className={clsx('app-header-content', {
                     'dark-header': mode === 'dark',
