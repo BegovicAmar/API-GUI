@@ -26,6 +26,7 @@ import moment from 'moment-timezone';
 import { useThemeContext } from './hooks/useThemeValue';
 import { CustomInput } from './components/CustomInput';
 import { CustomSelect } from './components/CustomSelect';
+import { DatePicker } from './components/CustomDatePicker';
 import { DEFAULT_LANGUAGE_CODE } from './constants';
 import { AddEnterprise, PoorEnterprise } from './components/AddEnterprise';
 import { Link, useParams } from 'react-router-dom';
@@ -449,15 +450,19 @@ function App() {
                             value={inputData.email}
                             onChange={(event) => handleOnDateChange('email', event)}
                         />
-                        <CustomInput
+                        <DatePicker
                             name="StartUtc"
                             value={inputData.startUtc}
-                            onChange={(event) => handleOnDateChange('startUtc', event)}
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                handleOnDateChange('startUtc', event)
+                            }
                         />
-                        <CustomInput
+                        <DatePicker
                             name="EndUtc"
                             value={inputData.endUtc}
-                            onChange={(event) => handleOnDateChange('endUtc', event)}
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                handleOnDateChange('endUtc', event)
+                            }
                         />
                         <button
                             className="uniform-width"
@@ -480,8 +485,7 @@ function App() {
                                 'light-error': mode === 'light',
                             })}
                         >
-                            <span className="error-icon">⚠️</span>{' '}
-                            {/* You can replace with an actual error icon if you have one */}
+                            <span className="error-icon">⚠️</span>
                             {errorMessage}
                         </div>
                     )}
