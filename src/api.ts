@@ -198,10 +198,10 @@ export interface CategoryAvailability {
     Availabilities: number[];
 }
 
-interface AvailabilityResponse {
+export interface AvailabilityResult {
     CategoryAvailabilities: CategoryAvailability[];
 }
 
-export const fetchAvailability = async (payload: AvailabilityPayload): Promise<AvailabilityResponse> => {
+export const fetchAvailabilityApi = async (payload: AvailabilityPayload): Promise<AvailabilityResult> => {
     return authCall(`${ENV_URL}/api/bookingEngine/v1/services/getAvailability`, payload);
 };
