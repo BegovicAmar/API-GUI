@@ -48,6 +48,47 @@ const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
                         >
                             <span>Booking Engine:</span>
                             <span>Add Multiple Reservations</span>
+                            <span className="in-progress-tag">In Progress</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#ConnectorAddReservation"
+                            className={mode === 'dark' ? 'dark-mode-text' : 'light-mode-text'}
+                        >
+                            <span>Connector:</span>
+                            <span>Add Reservation</span>
+                            <span className="planned-tag">Planned</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#ConnectorAddMultipleReservation"
+                            className={mode === 'dark' ? 'dark-mode-text' : 'light-mode-text'}
+                        >
+                            <span>Connector:</span>
+                            <span>Add Multiple Reservation</span>
+                            <span className="planned-tag">Planned</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#ConnectorInspectSpaces"
+                            className={mode === 'dark' ? 'dark-mode-text' : 'light-mode-text'}
+                        >
+                            <span>Connector:</span>
+                            <span>Inspect Spaces</span>
+                            <span className="planned-tag">Planned</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a
+                            href="#ConnectorCleanReservations"
+                            className={mode === 'dark' ? 'dark-mode-text' : 'light-mode-text'}
+                        >
+                            <span>Connector:</span>
+                            <span>Clean Reservations</span>
+                            <span className="planned-tag">Planned</span>
                         </a>
                     </li>
                 </ul>

@@ -349,3 +349,27 @@ a > span {
 .light-toggle-button {
     color: #333;
 }
+
+.in-progress-tag {
+    display: inline-block;
+    background-color: greenyellow;
+    color: black;
+    padding: 2px 10px;
+    border-radius: 12px;
+    margin-left: 5px; 
+    font-size: 0.8em;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.planned-tag {
+    display: inline-block;
+    background-color: orange;
+    color: black;
+    padding: 2px 10px;
+    border-radius: 12px;
+    margin-left: 5px; 
+    font-size: 0.8em;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
