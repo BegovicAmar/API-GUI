@@ -23,8 +23,15 @@ const Sidebar: React.FC<SidebarProps> = ({ mode, isVisible, headerHeight: propHe
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const sidebarElement = document.querySelector('.sidebar-menu');
-            if (sidebarElement && !sidebarElement.contains(event.target as Node) && isVisible) {
-                onClose(); // Call the onClose callback when clicked outside
+            const toggleElement = document.querySelector('.sidebar-toggle-button');
+
+            if (
+                sidebarElement &&
+                !sidebarElement.contains(event.target as Node) &&
+                (!toggleElement || !toggleElement.contains(event.target as Node)) &&
+                isVisible
+            ) {
+                onClose();
             }
         };
 
