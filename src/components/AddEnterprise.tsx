@@ -68,7 +68,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                 Add Enterprise
             </button>
             {showHiddenFields && (
-                <div className="uniform-width">
+                <div className="fields-wrapper">
                     <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
                         EnterpriseID/ConfigurationId:
                         <input className="uniform-width" type="text" ref={enterpriseIDRef} />

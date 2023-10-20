@@ -573,10 +573,9 @@ function App() {
                                 style={{ fontSize: '20px', marginTop: '1px' }}
                                 className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
                             >
-                                {reservationDetails === null
-                                    ? 'Click ⬆️ to create reservation'
-                                    : renderReservations(reservationDetails)}
+                                {reservationDetails && renderReservations(reservationDetails)}
                             </div>
+
                             {errorMessage && (
                                 <div
                                     className={clsx('error-container', {

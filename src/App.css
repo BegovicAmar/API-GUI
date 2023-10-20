@@ -31,7 +31,7 @@
     display: flex;  
     align-items: flex-start; 
     justify-content: center; 
-}
+    }
 
 .dark-card {
     background-color: #2a2a2a;
@@ -51,7 +51,7 @@
     flex-direction: column;
     align-items: center;
     overflow-y: auto;
-    width: 100%;            
+    width: 100%;
     max-width: calc(90vw - 240px); 
 }
 
@@ -65,6 +65,16 @@
 
 .center-content input {
     width: 100%;
+}
+
+.fields-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 200px; 
+    border: none;           /* Removes any borders */
+    outline: none;          /* Removes any outlines */
+    box-shadow: none;       /* Removes any box shadows */
 }
 
 /* Appheader */
@@ -178,7 +188,7 @@
 }
 
 .light-sidebar {
-    background-color: #f5f5f5;
+    background-color: #ffffff;
     color: black;
 }
 
@@ -280,15 +290,15 @@ button.uniform-width {
 }
 
 .qr-zoomed-container {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    display: grid;
+    place-items: center;
+    height: 100vh;  
     z-index: 1000;
 }
 
