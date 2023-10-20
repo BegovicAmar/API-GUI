@@ -1,5 +1,4 @@
 import React from 'react';
-import clsx from 'clsx';
 import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
 
 type AppHeaderProps = {
@@ -10,31 +9,12 @@ type AppHeaderProps = {
 };
 const AppHeader: React.FC<AppHeaderProps> = ({ mode, title, setTheme, onToggleSidebar }) => {
     return (
-        <div className={clsx('app-header-container', mode)}>
-            <button
-                className={clsx('sidebar-toggle-button', {
-                    'dark-toggle-button': mode === 'dark',
-                    'light-toggle-button': mode === 'light',
-                })}
-                onClick={onToggleSidebar}
-            >
+        <div className="app-header-container">
+            <button className="sidebar-toggle-button" onClick={onToggleSidebar}>
                 ☰
             </button>
-
-            <div
-                className={clsx('app-header-content', {
-                    'dark-header': mode === 'dark',
-                    'light-header': mode === 'light',
-                })}
-            >
-                <span
-                    className={clsx('app-header-title', {
-                        'dark-mode-text': mode === 'dark',
-                        'light-mode-text': mode === 'light',
-                    })}
-                >
-                    {title}
-                </span>
+            <div className="app-header-content">
+                <span className="app-header-title">{title}</span>
                 <div className="dark-mode-toggle-button">
                     <DarkModeToggle
                         mode={mode}
