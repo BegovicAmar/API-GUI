@@ -406,7 +406,6 @@ function App() {
 
     function handleLastNameClick(): void {
         const newLastName = generateShortLastName();
-        // setLastName(newLastName);
         setInputData((prevData) => ({
             ...prevData,
             email: generateRandomEmail(newLastName),
