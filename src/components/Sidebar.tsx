@@ -5,9 +5,10 @@ interface SidebarProps {
     mode: 'dark' | 'light';
     isVisible: boolean;
     headerHeight?: number;
+    onClose: () => void; // Added this callback prop
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ mode, isVisible, headerHeight: propHeaderHeight }) => {
+const Sidebar: React.FC<SidebarProps> = ({ mode, isVisible, headerHeight: propHeaderHeight, onClose }) => {
     const [localHeaderHeight, setLocalHeaderHeight] = useState(0);
 
     useEffect(() => {
@@ -18,6 +19,21 @@ const Sidebar: React.FC<SidebarProps> = ({ mode, isVisible, headerHeight: propHe
             }
         }
     }, [propHeaderHeight]);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const sidebarElement = document.querySelector('.sidebar-menu');
+            if (sidebarElement && !sidebarElement.contains(event.target as Node) && isVisible) {
+                onClose(); // Call the onClose callback when clicked outside
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isVisible, onClose]);
 
     const finalHeaderHeight = propHeaderHeight || localHeaderHeight;
 

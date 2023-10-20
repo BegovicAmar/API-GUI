@@ -483,7 +483,7 @@ function App() {
                         setTheme={setTheme}
                         onToggleSidebar={handleToggleSidebar}
                     />
-                    <Sidebar mode={mode} isVisible={sidebarVisible} />
+                    <Sidebar mode={mode} isVisible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
                     <div className="center-content">
                         <AddEnterprise addEnterprise={addEnterprise} />
                         <CustomSelect
