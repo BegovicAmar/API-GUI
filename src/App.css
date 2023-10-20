@@ -94,18 +94,32 @@
 .dark-mode-toggle-button {
     position: absolute;
     top: 10px;
-    left: 10px;
+    left: 64px;
+    top: 50%;
+    transform: translateY(-50%); 
 }
 
 .uniform-width {
-    background-color: white;
-    color: black;
     width: 200px;
+    cursor: pointer;
+    box-sizing: border-box;
+    margin-top: .1px;
+    margin-bottom: .1px;
+}
+
+input.uniform-width {
+    cursor: text;
 }
 
 button.uniform-width {
     background-color: lightblue;
-    color: black;
+    border: .5px solid black;
+    margin-top: .1px;
+    margin-bottom: .1px;
+}
+
+button.uniform-width:focus {
+    outline: 2px solid dodgerblue;
 }
 
 .dark .uniform-width {
@@ -116,6 +130,11 @@ button.uniform-width {
 .dark button.uniform-width {
     background-color: #555;
     color: white;
+    border: .5px solid #444; 
+}
+
+.dark button.uniform-width:focus {
+    outline: 2px solid lightblue; 
 }
 
 .dark .dark-mode-label {
@@ -179,22 +198,154 @@ button.uniform-width {
 }
 
 .dark-success {
-    background-color: #003300; /* Dark green background for dark mode */
-    color: #00cc00; /* Green text for dark mode */
+    background-color: #003300; 
+    color: #00cc00;
 }
 
 .light-success {
-    background-color: #e6ffe6; /* Light green background for light mode */
-    color: #003300; /* Dark green text for light mode */
+    background-color: #e6ffe6; 
+    color: #003300; 
 }
 
 .success-icon {
     margin-right: 10px;
 }
 
-.fields-wrapper {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 10;
+.sidebar-menu {
+    background-color: #333;
+    position: fixed;
+    top: 0;
+    left: -250px;
+    height: 100%;
+    width: 250px;
+    transition: left 0.3s ease-in-out; 
+    overflow-y: auto; 
+    border-right: 1px solid #555;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.sidebar-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar-menu ul li {
+    padding: 10px;
+    border-bottom: 1px solid #555;
+}
+
+.sidebar-menu ul li:last-child {
+    border-bottom: none;
+}
+
+.sidebar-menu ul li a {
+    text-decoration: none;
+}
+
+
+.dark-sidebar {
+    background-color: #333;
+    color: white; 
+}
+
+
+.light-sidebar {
+    background-color: #f5f5f5;
+    color: black;
+}
+
+.dark-mode-text {
+    color: white; 
+}
+
+.light-mode-text {
+    color: black; 
+}
+
+a > span {
+    display: block;
+}
+
+.app-header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    font-size: 14px; 
+    line-height: 1.2; 
+    display: flex;
+    flex-direction: column;
+
+}
+
+.dark-header {
+    color: white; 
+}
+
+.light-header {
+    color: black;
+}
+
+.dark-mode-text {
+    color: white; 
+}
+
+.light-mode-text {
+    color: black; 
+}
+
+.sidebar-toggle-button {
+    font-size: 24px; 
+    background-color: transparent; 
+    border: none; 
+    cursor: pointer; 
+    margin-left: 10px; 
+    padding: 10px; 
+    color: inherit; 
+    outline: none;
+    position: absolute; 
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%); 
+}
+
+.sidebar-toggle-button:hover {
+    opacity: 0.7; /* Adding a slight opacity change on hover */
+}
+
+.app-header-title {
+    font-size: 24px;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    flex-grow: 1;
+}
+
+.dark-mode-text {
+    color: white;
+}
+
+.light-mode-text {
+    color: black;
+}
+
+.dark-toggle-button {
+    color: #fff;
+}
+
+.light-toggle-button {
+    color: #333;
 }

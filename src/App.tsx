@@ -3,11 +3,13 @@ import './App.css';
 import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
     AgeCategory,
+    AvailabilityPayload,
     BookingEngine,
     ConfigurationGetResponse,
     CreateReservationGroupPayload,
     createSingleReservation,
     Enterprise,
+    fetchAvailability,
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
     fetchRateIds,
@@ -20,16 +22,18 @@ import {
     ResourceCategory,
 } from './api';
 import clsx from 'clsx';
-import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
 import QRCode from 'qrcode.react';
 import LoaderComponent from './components/LoaderComponent';
 import moment from 'moment-timezone';
 import { useThemeContext } from './hooks/useThemeValue';
 import { CustomInput } from './components/CustomInput';
 import { CustomSelect } from './components/CustomSelect';
+import { DatePicker } from './components/CustomDatePicker';
 import { DEFAULT_LANGUAGE_CODE } from './constants';
 import { AddEnterprise, PoorEnterprise } from './components/AddEnterprise';
 import { Link, useParams } from 'react-router-dom';
+import Sidebar from './components/Sidebar';
+import AppHeader from './components/AppHeader';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -85,13 +89,13 @@ function App() {
     const { setTheme, value: mode } = useThemeContext();
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
+    const [availabilityData, setAvailabilityData] = useState<Array<{ categoryId: string; lowestAvailability: number }>>(
+        []
+    );
     const params = useParams();
-
     const hasEnterpriseIdInUrl = params?.['enterpriseId'] != null;
     const [shouldCreateReservation, setShouldCreateReservation] = useState<boolean>(hasEnterpriseIdInUrl);
     const [isReservationBeingCreated, setIsBeingCreated] = useState<boolean>(false);
-
     const [selectedEnterpriseId, selectEnterprise] = useState<string>(
         params['enterpriseId'] ?? '8a51f050-8467-4e92-84d5-abc800c810b8'
     );
@@ -263,10 +267,42 @@ function App() {
                                     StartUtc: startMoment,
                                     EndUtc: endMoment,
                                 };
-                                fetchRateIds(ratePayload).then((rateResponse) => {
-                                    setRates(rateResponse.Rates);
-                                    setSelectedRateId(rateResponse.Rates[0].Id);
-                                });
+                                fetchRateIds(ratePayload)
+                                    .then((rateResponse) => {
+                                        setRates(rateResponse.Rates);
+                                        setSelectedRateId(rateResponse.Rates[0].Id);
+
+                                        const availabilityPayload: AvailabilityPayload = {
+                                            EnterpriseId: selectedEnterpriseId,
+                                            ServiceId: serviceId,
+                                            CategoryId: [resourceCategoryResponse.ResourceCategories[0].Id],
+                                            StartUtc: startMoment,
+                                            EndUtc: endMoment,
+                                        };
+
+                                        fetchAvailability(availabilityPayload)
+                                            .then((availabilityResponse) => {
+                                                const availabilityData =
+                                                    availabilityResponse.CategoryAvailabilities.map((category) => ({
+                                                        categoryId: category.CategoryId,
+                                                        lowestAvailability: Math.min(...category.Availabilities),
+                                                    }));
+
+                                                const highestAvailabilityCategory = availabilityData.sort(
+                                                    (a, b) => b.lowestAvailability - a.lowestAvailability
+                                                )[0];
+
+                                                setSelectedResourceCategoryId(highestAvailabilityCategory.categoryId);
+
+                                                setAvailabilityData(availabilityData);
+                                            })
+                                            .catch((error) => {
+                                                console.error('Error fetching availability', error);
+                                            });
+                                    })
+                                    .catch((error) => {
+                                        console.error('Error fetching rate IDs', error);
+                                    });
                             }
                         });
                     }
@@ -395,21 +431,10 @@ function App() {
                 )
             ) : (
                 <>
-                    <div className="dark-mode-toggle-button">
-                        <DarkModeToggle
-                            mode={mode}
-                            dark="Dark"
-                            light="Light"
-                            size="sm"
-                            onChange={(mode) => {
-                                setTheme(mode);
-                                // window.localStorage.setItem('themeMode', mode);
-                            }}
-                        />
-                    </div>
-                    <AddEnterprise addEnterprise={addEnterprise} />
-
+                    <AppHeader mode={mode} title="API Toolbelt" setTheme={setTheme} />
+                    <Sidebar mode={mode} />
                     <div className="center-content">
+                        <AddEnterprise addEnterprise={addEnterprise} />
                         <CustomSelect
                             name="Enterprise"
                             values={enterprises.map(({ id, name }) => ({
@@ -421,10 +446,17 @@ function App() {
                         />
                         <CustomSelect
                             name="Resource category"
-                            values={resourceCategories.map(({ Id, Name }) => ({
-                                value: Id,
-                                name: Name,
-                            }))}
+                            values={resourceCategories.map(({ Id, Name }) => {
+                                const matchedAvailability = availabilityData.find((data) => data.categoryId === Id);
+                                const availability = matchedAvailability
+                                    ? matchedAvailability.lowestAvailability.toString()
+                                    : undefined;
+                                return {
+                                    value: Id,
+                                    name: Name,
+                                    availability: availability,
+                                };
+                            })}
                             selectedValue={selectedResourceCategoryId}
                             onChange={handleResourceCategoryIdChange}
                         />
@@ -447,7 +479,7 @@ function App() {
                             onChange={handleRateIdChange}
                         />
                         <button className="uniform-width" onClick={handleLastNameClick}>
-                            Random
+                            Randomize user
                         </button>
                         <CustomInput
                             name="LastName"
@@ -459,15 +491,19 @@ function App() {
                             value={inputData.email}
                             onChange={(event) => handleOnDateChange('email', event)}
                         />
-                        <CustomInput
+                        <DatePicker
                             name="StartUtc"
                             value={inputData.startUtc}
-                            onChange={(event) => handleOnDateChange('startUtc', event)}
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                handleOnDateChange('startUtc', event)
+                            }
                         />
-                        <CustomInput
+                        <DatePicker
                             name="EndUtc"
                             value={inputData.endUtc}
-                            onChange={(event) => handleOnDateChange('endUtc', event)}
+                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                handleOnDateChange('endUtc', event)
+                            }
                         />
                         <button
                             className="uniform-width"
@@ -490,17 +526,16 @@ function App() {
                                 'light-error': mode === 'light',
                             })}
                         >
-                            <span className="error-icon">⚠️</span>{' '}
-                            {/* You can replace with an actual error icon if you have one */}
+                            <span className="error-icon">⚠️</span>
                             {errorMessage}
                         </div>
                     )}
                     <div
-                        style={{ fontSize: '20px', marginTop: '2rem' }}
+                        style={{ fontSize: '20px', marginTop: '1px' }}
                         className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
                     >
                         {reservationDetails === null
-                            ? 'No reservation fetched'
+                            ? 'Click ⬆️ to create reservation'
                             : renderReservations(reservationDetails)}
                     </div>
                     {jsonData && (
@@ -517,6 +552,7 @@ function App() {
                             >
                                 <QRCode value={jsonData} />
                             </div>
+                            <span>Click QR code to enlarge</span>
                         </button>
                     )}
                 </>

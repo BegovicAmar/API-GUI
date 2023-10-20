@@ -66,7 +66,9 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
 
     return (
         <div className="fields-wrapper">
-            <button onClick={() => setShowHiddenFields(!showHiddenFields)}>Add Enterprise</button>
+            <button className="uniform-width" onClick={() => setShowHiddenFields(!showHiddenFields)}>
+                Add Enterprise
+            </button>
             <div className="center-content">
                 {showHiddenFields && (
                     <>
@@ -74,7 +76,9 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                             EnterpriseID/ConfigurationId:
                             <input className="uniform-width" type="text" ref={enterpriseIDRef} />
                         </label>
-                        <button onClick={addEnterpriseToDropdown}>Submit</button>
+                        <button className="uniform-width" onClick={addEnterpriseToDropdown}>
+                            Submit
+                        </button>
                         {validationError && (
                             <div
                                 className={clsx('error-container', {
