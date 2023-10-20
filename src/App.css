@@ -85,24 +85,32 @@
 
 /* Sidebar */
 
-.sidebar-menu {
-    position: fixed;
-    top: 70px; 
-    left: -250px;
-    height: calc(100% - 60px); 
-    width: 250px;
-    transition: left 0.3s ease-in-out; 
-    overflow-y: auto; 
-    border-right: 1px solid #555;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
 .sidebar-container {
     position: absolute;
     top: 0;
-    left: 0;  /* or wherever you want the sidebar to be */
-    width: 250px;  /* adjust as needed */
+    bottom: 0; 
+    left: 0;
+    width: 250px;
+    pointer-events: none;
+}
+
+.sidebar-menu {
+    position: absolute;
+    top: 0; 
+    bottom: 0; 
+    left: -250px; 
+    width: 250px;
+    overflow-y: auto;
+    border-right: 1px solid #555;
+    padding: 10px;
+    box-sizing: border-box;
+    transition: left 0.3s ease-in-out; 
+    z-index: 1001;
+}
+
+.sidebar-visible {
+    left: 0 !important;
+    pointer-events: auto;
 }
 
 .sidebar-toggle-button {
@@ -122,10 +130,6 @@
 
 .sidebar-toggle-button:hover {
     opacity: 0.7;
-}
-
-.sidebar-visible {
-    left: 0 !important;
 }
 
 .sidebar-menu ul {
