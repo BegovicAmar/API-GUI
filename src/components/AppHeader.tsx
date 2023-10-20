@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import clsx from 'clsx';
 import { DarkModeToggle } from '@anatoliygatt/dark-mode-toggle';
 
@@ -6,32 +6,9 @@ type AppHeaderProps = {
     mode: 'dark' | 'light';
     title: string;
     setTheme: (mode: 'dark' | 'light') => void;
+    onToggleSidebar: () => void;
 };
-
-const AppHeader: React.FC<AppHeaderProps> = ({ mode, title, setTheme }) => {
-    useEffect(() => {
-        const sidebarToggleButton = document.querySelector('.sidebar-toggle-button') as HTMLElement;
-        const sidebarMenu = document.querySelector('.sidebar-menu') as HTMLElement;
-
-        const handleToggle = () => {
-            if (sidebarMenu.style.left === '-250px' || sidebarMenu.style.left === '') {
-                sidebarMenu.style.left = '0px';
-            } else {
-                sidebarMenu.style.left = '-250px';
-            }
-        };
-
-        if (sidebarToggleButton && sidebarMenu) {
-            sidebarToggleButton.addEventListener('click', handleToggle);
-        }
-
-        return () => {
-            if (sidebarToggleButton) {
-                sidebarToggleButton.removeEventListener('click', handleToggle);
-            }
-        };
-    }, []);
-
+const AppHeader: React.FC<AppHeaderProps> = ({ mode, title, setTheme, onToggleSidebar }) => {
     return (
         <div className="app-header-container">
             <button
@@ -39,6 +16,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ mode, title, setTheme }) => {
                     'dark-toggle-button': mode === 'dark',
                     'light-toggle-button': mode === 'light',
                 })}
+                onClick={onToggleSidebar}
             >
                 ☰
             </button>

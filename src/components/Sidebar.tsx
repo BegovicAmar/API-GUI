@@ -1,37 +1,33 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
 interface SidebarProps {
     mode: 'dark' | 'light';
+    isVisible: boolean;
+    headerHeight?: number;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
+const Sidebar: React.FC<SidebarProps> = ({ mode, isVisible, headerHeight: propHeaderHeight }) => {
+    const [localHeaderHeight, setLocalHeaderHeight] = useState(0);
+
     useEffect(() => {
-        const adjustSidebarPosition = () => {
-            const header = document.querySelector('.app-header-container') as HTMLElement;
-            const sidebar = document.querySelector('.sidebar-menu') as HTMLElement;
-
-            if (header && sidebar) {
-                const headerHeight = header.offsetHeight;
-                sidebar.style.top = `${headerHeight}px`;
+        if (!propHeaderHeight) {
+            const headerElem = document.querySelector('.app-header-container') as HTMLElement | null;
+            if (headerElem) {
+                setLocalHeaderHeight(headerElem.offsetHeight);
             }
-        };
+        }
+    }, [propHeaderHeight]);
 
-        adjustSidebarPosition();
-
-        window.addEventListener('resize', adjustSidebarPosition);
-
-        return () => {
-            window.removeEventListener('resize', adjustSidebarPosition);
-        };
-    }, []);
+    const finalHeaderHeight = propHeaderHeight || localHeaderHeight;
 
     return (
-        <div className="sidebar-container">
+        <div className="sidebar-container" style={{ top: `${finalHeaderHeight}px` }}>
             <nav
                 className={clsx('sidebar-menu', {
                     'dark-sidebar': mode === 'dark',
                     'light-sidebar': mode === 'light',
+                    'sidebar-visible': isVisible,
                 })}
             >
                 <ul>

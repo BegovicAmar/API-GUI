@@ -38,9 +38,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                 setSuccessMessage(`Enterprise "${enterpriseName}" added successfully`);
                 setTimeout(() => {
                     setSuccessMessage(null);
-                }, 5000); // Clear the message after 3 seconds
-
-                // Clear the input fields
+                }, 5000);
                 enterpriseIDRef.current.value = '';
             } catch (error) {
                 // eslint-disable-next-line max-len
@@ -69,7 +67,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
             <button className="uniform-width" onClick={() => setShowHiddenFields(!showHiddenFields)}>
                 Add Enterprise
             </button>
-            <div className="center-content">
+            <div className="uniform-width">
                 {showHiddenFields && (
                     <>
                         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
@@ -92,15 +90,12 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                         )}
                         {successMessage && (
                             <div
-                                className={clsx(
-                                    'success-container',
-                                    {
-                                        'dark-success': mode === 'dark',
-                                        'light-success': mode === 'light',
-                                    } // Conditional classes
-                                )}
+                                className={clsx('success-container', {
+                                    'dark-success': mode === 'dark',
+                                    'light-success': mode === 'light',
+                                })}
                             >
-                                <span className="success-icon">✅</span> {/* Display a checkmark as a success icon */}
+                                <span className="success-icon">✅</span>
                                 {successMessage}
                             </div>
                         )}

@@ -90,6 +90,8 @@ function App() {
     const { setTheme, value: mode } = useThemeContext();
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [sidebarVisible, setSidebarVisible] = useState(false);
+
     const [availabilityData, setAvailabilityData] = useState<Array<{ categoryId: string; lowestAvailability: number }>>(
         []
     );
@@ -437,6 +439,10 @@ function App() {
         setSelectedResourceCategoryId(event.target.value);
     };
 
+    const handleToggleSidebar = () => {
+        setSidebarVisible(!sidebarVisible);
+    };
+
     return (
         <div className={clsx('App', { dark: mode === 'dark' })}>
             {isLoading && <LoaderComponent type="reservation" />}
@@ -452,8 +458,7 @@ function App() {
                                 'light-error': mode === 'light',
                             })}
                         >
-                            <span className="error-icon">⚠️</span>{' '}
-                            {/* You can replace with an actual error icon if you have one */}
+                            <span className="error-icon">⚠️</span>
                             {errorMessage}
                         </div>
                         <Link
@@ -472,8 +477,13 @@ function App() {
                 )
             ) : (
                 <>
-                    <AppHeader mode={mode} title="API Toolbelt" setTheme={setTheme} />
-                    <Sidebar mode={mode} />
+                    <AppHeader
+                        mode={mode}
+                        title="API Toolbelt"
+                        setTheme={setTheme}
+                        onToggleSidebar={handleToggleSidebar}
+                    />
+                    <Sidebar mode={mode} isVisible={sidebarVisible} />
                     <div className="center-content">
                         <AddEnterprise addEnterprise={addEnterprise} />
                         <CustomSelect
@@ -559,43 +569,43 @@ function App() {
                         >
                             Create reservation
                         </button>
-                    </div>
-                    {errorMessage && (
                         <div
-                            className={clsx('error-container', {
-                                'dark-error': mode === 'dark',
-                                'light-error': mode === 'light',
-                            })}
+                            style={{ fontSize: '20px', marginTop: '1px' }}
+                            className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
                         >
-                            <span className="error-icon">⚠️</span>
-                            {errorMessage}
+                            {reservationDetails === null
+                                ? 'Click ⬆️ to create reservation'
+                                : renderReservations(reservationDetails)}
                         </div>
-                    )}
-                    <div
-                        style={{ fontSize: '20px', marginTop: '1px' }}
-                        className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
-                    >
-                        {reservationDetails === null
-                            ? 'Click ⬆️ to create reservation'
-                            : renderReservations(reservationDetails)}
-                    </div>
-                    {jsonData && (
-                        <button
-                            className={isQRZoomed ? 'qr-zoomed-container' : ''}
-                            onClick={() => setQRZoomed(!isQRZoomed)}
-                        >
+                        {errorMessage && (
                             <div
-                                className="qr-wrapper"
-                                style={{
-                                    transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)',
-                                    transition: 'transform 0.3s',
-                                }}
+                                className={clsx('error-container', {
+                                    'dark-error': mode === 'dark',
+                                    'light-error': mode === 'light',
+                                })}
                             >
-                                <QRCode value={jsonData} />
+                                <span className="error-icon">⚠️</span>
+                                {errorMessage}
                             </div>
-                            <span>Click QR code to enlarge</span>
-                        </button>
-                    )}
+                        )}
+                        {jsonData && (
+                            <button
+                                className={isQRZoomed ? 'qr-zoomed-container' : ''}
+                                onClick={() => setQRZoomed(!isQRZoomed)}
+                            >
+                                <div
+                                    className="qr-wrapper"
+                                    style={{
+                                        transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)',
+                                        transition: 'transform 0.3s',
+                                    }}
+                                >
+                                    <QRCode value={jsonData} />
+                                </div>
+                                <span>Click QR code to enlarge</span>
+                            </button>
+                        )}
+                    </div>
                 </>
             )}
         </div>
