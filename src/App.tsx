@@ -4,12 +4,13 @@ import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, ge
 import {
     AgeCategory,
     AvailabilityPayload,
+    AvailabilityResult,
     BookingEngine,
     ConfigurationGetResponse,
     CreateReservationGroupPayload,
     createSingleReservation,
     Enterprise,
-    fetchAvailability,
+    fetchAvailabilityApi,
     fetchCreateReservation,
     fetchEnterpriseConfiguration,
     fetchRateIds,
@@ -124,6 +125,55 @@ function App() {
         endUtc: getEndDateFromStartDate(getTodaysDate()),
     });
 
+    const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
+
+    const processAvailabilityData = (availabilityResponse: AvailabilityResult) => {
+        const availabilityData = availabilityResponse.CategoryAvailabilities.map((category) => ({
+            categoryId: category.CategoryId,
+            lowestAvailability: Math.min(...category.Availabilities),
+        }));
+
+        const highestAvailabilityCategory = availabilityData.sort(
+            (a, b) => b.lowestAvailability - a.lowestAvailability
+        )[0];
+
+        setSelectedResourceCategoryId(highestAvailabilityCategory.categoryId);
+
+        setAvailabilityData(availabilityData);
+    };
+    const reFetchAvailability = useCallback(() => {
+        const timezone = configurationData?.Enterprises?.find((enterprise) => enterprise.Id === selectedEnterpriseId)
+            ?.IanaTimeZoneIdentifier;
+        const startMoment = timezone
+            ? moment.tz(`${inputData.startUtc}T00:00:00`, timezone).toISOString()
+            : inputData.startUtc;
+        const endMoment = timezone
+            ? moment.tz(`${inputData.endUtc}T00:00:00`, timezone).toISOString()
+            : inputData.endUtc;
+        if (configurationData?.BookingEngines?.[0].ServiceId == null) {
+            return;
+        }
+
+        const availabilityPayload: AvailabilityPayload = {
+            EnterpriseId: selectedEnterpriseId,
+            ServiceId: configurationData?.BookingEngines?.[0].ServiceId,
+            CategoryId: [resourceCategories[0].Id],
+            StartUtc: startMoment,
+            EndUtc: endMoment,
+        };
+        fetchAvailabilityApi(availabilityPayload)
+            .then(processAvailabilityData)
+            .catch((error) => {
+                console.error('Error fetching availability', error);
+            });
+    }, [
+        configurationData?.BookingEngines,
+        configurationData?.Enterprises,
+        inputData.endUtc,
+        inputData.startUtc,
+        resourceCategories,
+        selectedEnterpriseId,
+    ]);
     const createReservation = useCallback(
         async ({ ageCategoryId, resourceCategoryId, enterprises, bookingEngines }: CreateReservationOptions) => {
             setErrorMessage(null);
@@ -197,6 +247,7 @@ function App() {
                 };
                 setShouldCreateReservation(false);
                 setReservationDetails(enhancedResponse);
+                reFetchAvailability();
             } catch (err: any) {
                 setErrorMessage(err.message);
                 setIsLoading(false);
@@ -212,6 +263,7 @@ function App() {
             rates,
             selectedEnterpriseId,
             selectedRateId,
+            reFetchAvailability,
         ]
     );
 
@@ -280,22 +332,8 @@ function App() {
                                             EndUtc: endMoment,
                                         };
 
-                                        fetchAvailability(availabilityPayload)
-                                            .then((availabilityResponse) => {
-                                                const availabilityData =
-                                                    availabilityResponse.CategoryAvailabilities.map((category) => ({
-                                                        categoryId: category.CategoryId,
-                                                        lowestAvailability: Math.min(...category.Availabilities),
-                                                    }));
-
-                                                const highestAvailabilityCategory = availabilityData.sort(
-                                                    (a, b) => b.lowestAvailability - a.lowestAvailability
-                                                )[0];
-
-                                                setSelectedResourceCategoryId(highestAvailabilityCategory.categoryId);
-
-                                                setAvailabilityData(availabilityData);
-                                            })
+                                        fetchAvailabilityApi(availabilityPayload)
+                                            .then(processAvailabilityData)
                                             .catch((error) => {
                                                 console.error('Error fetching availability', error);
                                             });
@@ -314,7 +352,6 @@ function App() {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         [inputData.endUtc, inputData.startUtc, selectedAgeCategoryId, selectedEnterpriseId, shouldCreateReservation]
     );
-    const [configurationData, setConfigurationData] = useState<ConfigurationGetResponse | null>(null);
     useEffect(() => {
         if (
             shouldCreateReservation &&
@@ -392,6 +429,7 @@ function App() {
     const handleSelectEnterprise = async (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(null);
         setSelectedResourceCategoryId(null);
+        setAvailabilityData([]);
         selectEnterprise(event.target.value);
     };
 
@@ -402,7 +440,10 @@ function App() {
     return (
         <div className={clsx('App', { dark: mode === 'dark' })}>
             {isLoading && <LoaderComponent type="reservation" />}
-            {selectedAgeCategoryId == null || selectedResourceCategoryId == null || selectedRateId == null ? (
+            {selectedAgeCategoryId == null ||
+            selectedResourceCategoryId == null ||
+            selectedRateId == null ||
+            availabilityData.length === 0 ? (
                 errorMessage != null ? (
                     <>
                         <div
