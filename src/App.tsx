@@ -479,7 +479,7 @@ function App() {
                             onChange={handleRateIdChange}
                         />
                         <button className="uniform-width" onClick={handleLastNameClick}>
-                            Random
+                            Randomize user
                         </button>
                         <CustomInput
                             name="LastName"

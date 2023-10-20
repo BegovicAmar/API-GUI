@@ -102,6 +102,9 @@
 .uniform-width {
     width: 200px;
     cursor: pointer;
+    box-sizing: border-box;
+    margin-top: .1px;
+    margin-bottom: .1px;
 }
 
 input.uniform-width {
@@ -111,6 +114,8 @@ input.uniform-width {
 button.uniform-width {
     background-color: lightblue;
     border: .5px solid black;
+    margin-top: .1px;
+    margin-bottom: .1px;
 }
 
 button.uniform-width:focus {
