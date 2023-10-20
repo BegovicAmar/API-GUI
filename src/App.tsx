@@ -494,6 +494,7 @@ function App() {
                                 selectedValue={selectedEnterpriseId}
                                 onChange={handleSelectEnterprise}
                             />
+                            <AddEnterprise addEnterprise={addEnterprise} />
                             <CustomSelect
                                 name="Resource Category"
                                 values={resourceCategories.map(({ Id, Name }) => {
