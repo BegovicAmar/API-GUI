@@ -486,7 +486,7 @@ function App() {
                     <div className={mode === 'dark' ? 'dark-card' : 'card'}>
                         <div className="center-content">
                             <CustomSelect
-                                name="Enterprise"
+                                name="Choose Enterprise"
                                 values={enterprises.map(({ id, name }) => ({
                                     value: id,
                                     name: { [DEFAULT_LANGUAGE_CODE]: name },
@@ -494,6 +494,7 @@ function App() {
                                 selectedValue={selectedEnterpriseId}
                                 onChange={handleSelectEnterprise}
                             />
+                            <span>or</span>
                             <AddEnterprise addEnterprise={addEnterprise} />
                             <CustomSelect
                                 name="Resource Category"
