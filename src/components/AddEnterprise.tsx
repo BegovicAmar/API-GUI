@@ -65,7 +65,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
     return (
         <div className="fields-wrapper">
             <button className="uniform-width" onClick={() => setShowHiddenFields(!showHiddenFields)}>
-                Add Enterprise
+                {showHiddenFields ? 'Hide Add Enterprise' : 'Add Enterprise'}
             </button>
             {showHiddenFields && (
                 <div className="fields-wrapper">
