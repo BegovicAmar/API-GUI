@@ -26,7 +26,19 @@ export const generateShortLastName = (): string => {
 export const generateRandomEmail = (lastName: string) => {
     const domains = ['gmail.com', 'yahoo.com', 'outlook.com'];
     const domain = domains[Math.floor(Math.random() * domains.length)];
-    return `${lastName.toLowerCase()}${Math.floor(Math.random() * 1000)}@${domain}`;
+
+    const generateRandomString = (length: number) => {
+        const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < length; i++) {
+            result += characters.charAt(Math.floor(Math.random() * characters.length));
+        }
+        return result;
+    };
+
+    const randomString = generateRandomString(4);
+
+    return `${lastName.toLowerCase()}-${randomString}${Math.floor(Math.random() * 1000)}@${domain}`;
 };
 
 export const getDefaultLanguageTextOrFallback = (localizedPropery: Record<string, string>) => {

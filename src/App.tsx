@@ -478,7 +478,7 @@ function App() {
                 <>
                     <AppHeader
                         mode={mode}
-                        title="API Toolbelt"
+                        title="Mews lite"
                         setTheme={setTheme}
                         onToggleSidebar={handleToggleSidebar}
                     />
