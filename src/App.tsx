@@ -495,7 +495,7 @@ function App() {
                                     selectedValue={selectedEnterpriseId}
                                     onChange={handleSelectEnterprise}
                                 />
-                                <span>or</span>
+                                <span className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>or</span>
                                 <AddEnterprise addEnterprise={addEnterprise} />
                                 <CustomSelect
                                     name="Resource Category"
