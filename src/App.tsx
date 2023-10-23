@@ -533,9 +533,11 @@ function App() {
                                     selectedValue={selectedRateId}
                                     onChange={handleRateIdChange}
                                 />
-                                <button className="uniform-width" onClick={handleLastNameClick}>
-                                    Randomize Guest
-                                </button>
+                                <div className="fields-wrapper">
+                                    <button className="uniform-width" onClick={handleLastNameClick}>
+                                        Randomize Guest
+                                    </button>
+                                </div>
                                 <CustomInput
                                     name="Last Name"
                                     value={inputData.lastName}
@@ -560,19 +562,21 @@ function App() {
                                         handleOnDateChange('endUtc', event)
                                     }
                                 />
-                                <button
-                                    className="uniform-width"
-                                    onClick={() =>
-                                        createReservation({
-                                            ageCategoryId: selectedAgeCategoryId,
-                                            resourceCategoryId: selectedResourceCategoryId,
-                                            bookingEngines: configurationData?.BookingEngines,
-                                            enterprises: configurationData?.Enterprises,
-                                        })
-                                    }
-                                >
-                                    Create Reservation
-                                </button>
+                                <div className="fields-wrapper">
+                                    <button
+                                        className="uniform-width"
+                                        onClick={() =>
+                                            createReservation({
+                                                ageCategoryId: selectedAgeCategoryId,
+                                                resourceCategoryId: selectedResourceCategoryId,
+                                                bookingEngines: configurationData?.BookingEngines,
+                                                enterprises: configurationData?.Enterprises,
+                                            })
+                                        }
+                                    >
+                                        Create Reservation
+                                    </button>
+                                </div>
                                 {errorMessage && (
                                     <div
                                         className={clsx('error-container', {
