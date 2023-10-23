@@ -23,18 +23,18 @@ export const generateShortLastName = (): string => {
     return lastName;
 };
 
+const generateRandomString = (length: number) => {
+    const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+};
+
 export const generateRandomEmail = (lastName: string) => {
     const domains = ['gmail.com', 'yahoo.com', 'outlook.com'];
     const domain = domains[Math.floor(Math.random() * domains.length)];
-
-    const generateRandomString = (length: number) => {
-        const characters = 'abcdefghijklmnopqrstuvwxyz0123456789';
-        let result = '';
-        for (let i = 0; i < length; i++) {
-            result += characters.charAt(Math.floor(Math.random() * characters.length));
-        }
-        return result;
-    };
 
     const randomString = generateRandomString(4);
 
