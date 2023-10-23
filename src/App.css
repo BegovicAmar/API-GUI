@@ -1,56 +1,215 @@
+/* General Styles */
 .App {
-    text-align: center;
-    position: relative;
-}
-
-.App {
-    transition: background-color 250ms ease-in-out;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
+    flex-direction: column; 
+    width: 100%;
+    min-height: 100vh;
     overflow: auto;
     background-color: #e5e9ec;
+    text-align: center;
+    box-sizing: border-box; 
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.App-body {
+    display: flex;
+    justify-content: center; 
+    align-items: flex-start;
+    gap: 20px;   
+    padding: 50px;         
+}
+
+
+.App-link {
+    color: #61dafb;
 }
 
 .dark {
     background-color: #26272a;
 }
 
-.App-header {
-    background-color: #282c34;
-    min-height: 100vh;
+.card {
+    background-color: white;
+    border-radius: 12px; 
+    padding: 15px;      
+    margin: 15px;       
+    max-width: 450px;  
+    overflow: hidden;
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.App-link {
-    color: #61dafb;
+.dark-card {
+    background-color: #2a2a2a;
+    border-radius: 12px; 
+    padding: 15px;      
+    margin: 15px;      
+    max-width: 450px;  
+    overflow: hidden;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 .center-content {
+    padding: 50px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    overflow-y: auto;
+    width: 750px;
+    max-width: 750px;
+    box-sizing: border-box; 
 }
 
 .center-content label {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    width: 200px; /* Width of the widest input box */
-    margin: 0.5rem 0; /* Some vertical spacing */
+    width: 100%;  
+    max-width: 400px; 
+    margin: 0.5rem 0;
+    box-sizing: border-box; 
 }
 
 .center-content input {
     width: 100%;
+    margin: 0.2rem 0;
+    box-sizing: border-box;  
 }
+
+.fields-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;  
+    max-width: 400px; 
+    margin: 0.5rem 0;
+    box-sizing: border-box;      
+}
+
+/* Appheader */
+
+.app-header-container {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px 20px;
+    width: 100%;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-bottom: .5px solid #aca1a1;
+    line-height: 1.2;
+    flex-direction: row;
+    justify-self: center;
+    background-color: #242435;
+    color: white; 
+}
+
+.app-header-title {
+    font-size: 24px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; 
+    height: 100%;
+    flex-grow: 1;
+    background: transparent; 
+    margin-left: 60px;
+    color: white; 
+}
+
+/* Sidebar */
+
+.sidebar-container {
+    position: absolute;
+    top: 0;
+    bottom: 0; 
+    left: -250;
+    width: 250px;
+    pointer-events: none;
+}
+
+.sidebar-menu {
+    position: absolute;
+    top: 0; 
+    bottom: 0; 
+    left: -250px; 
+    width: 250px;
+    overflow-y: auto;
+    border-top: 1px solid #aca1a1;
+    border-right: 1px solid #aca1a1;
+    padding: 10px;
+    box-sizing: border-box;
+    transition: left 0.3s ease-in-out; 
+    z-index: 1001;
+}
+
+.sidebar-visible {
+    left: 0 !important;
+    pointer-events: auto;
+}
+
+.sidebar-toggle-button {
+    font-size: 30px; 
+    background-color: transparent; 
+    border: none; 
+    cursor: pointer; 
+    margin-left: 10px; 
+    padding: 10px; 
+    color: inherit; 
+    outline: none;
+    position: absolute; 
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%); 
+}
+
+.sidebar-toggle-button:hover {
+    opacity: 0.7;
+}
+
+.sidebar-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.sidebar-menu ul li {
+    padding: 10px;
+    border-bottom: 1px solid #555;
+}
+
+.sidebar-menu ul li:last-child {
+    border-bottom: none;
+}
+
+.sidebar-menu ul li a {
+    text-decoration: none;
+}
+
+.dark-sidebar {
+    background-color: #333;
+    color: white; 
+}
+
+.light-sidebar {
+    background-color: #ffffff;
+    color: black;
+}
+
+/* Loader Styles */
 
 .loader-container {
     position: fixed;
@@ -58,12 +217,12 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+    background: rgba(0, 0, 0, 0.7); 
     display: flex;
-    justify-content: center; /* Horizontally center the contents */
-    align-items: center; /* Vertically center the contents */
-    flex-direction: column; /* Stack the loader and the text vertically */
-    z-index: 1000; /* High z-index to ensure it overlays other elements */
+    justify-content: center; 
+    align-items: center; 
+    flex-direction: column; 
+    z-index: 1000; 
 }
 
 .loader {
@@ -73,12 +232,13 @@
     width: 40px;
     height: 40px;
     animation: spin 1s linear infinite;
-    margin-bottom: 10px; /* Some space between the loader and the text */
+    margin-bottom: 10px; 
 }
 
 .loader-text {
     color: white;
     font-size: 16px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     text-align: center;
 }
 
@@ -91,20 +251,27 @@
     }
 }
 
+/* Dark Mode Button */
+
 .dark-mode-toggle-button {
     position: absolute;
     top: 10px;
-    left: 64px;
+    right: 40px;
     top: 50%;
-    transform: translateY(-50%); 
+    transform: translateY(-50%);
+    color: #ffffff; 
 }
 
 .uniform-width {
-    width: 200px;
+    width: 100%; 
+    max-width: 350px; 
     cursor: pointer;
-    box-sizing: border-box;
-    margin-top: .1px;
-    margin-bottom: .1px;
+    box-sizing: border-box; 
+    padding: 5px 5px;
+    font-size: 15px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
 input.uniform-width {
@@ -112,32 +279,20 @@ input.uniform-width {
 }
 
 button.uniform-width {
-    background-color: lightblue;
+    background-color: #3936f2;
     border: .5px solid black;
-    margin-top: .1px;
-    margin-bottom: .1px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    color: #fff;
 }
 
-button.uniform-width:focus {
-    outline: 2px solid dodgerblue;
+
+.dark-mode-label,
+.light-mode-label {
+    display: block;
 }
 
-.dark .uniform-width {
-    background-color: #333;
-    color: white;
-}
-
-.dark button.uniform-width {
-    background-color: #555;
-    color: white;
-    border: .5px solid #444; 
-}
-
-.dark button.uniform-width:focus {
-    outline: 2px solid lightblue; 
-}
-
-.dark .dark-mode-label {
+.dark-mode-label {
     color: white;
 }
 
@@ -145,51 +300,109 @@ button.uniform-width:focus {
     color: black;
 }
 
+.dark-mode-label input,
+.light-mode-label input {
+    margin-top: 5px;
+}
+
+
+.light-mode-label select, .dark-mode-label select {
+    margin-top: 5px; 
+}
+
 .qr-zoomed-container {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     background-color: rgba(0, 0, 0, 0.7);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* to ensure it's above other elements */
+    display: grid;
+    place-items: center;
+    height: 100vh;  
+    z-index: 1000;
 }
 
 .qr-wrapper {
-    cursor: pointer; /* to indicate clickable */
+    cursor: pointer;
     padding: 15px;
     background-color: white;
 }
 
+a > span {
+    display: block;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.dark-mode-text {
+    color: white;
+}
+
+.light-mode-text {
+    color: black;
+}
+
+/* Tags */
+
+.in-progress-tag {
+    display: inline-block;
+    background-color: greenyellow;
+    color: black;
+    padding: 2px 10px;
+    border-radius: 12px;
+    margin-left: 5px; 
+    font-size: 0.8em;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.planned-tag {
+    display: inline-block;
+    background-color: orange;
+    color: black;
+    padding: 2px 10px;
+    border-radius: 12px;
+    margin-left: 5px; 
+    font-size: 0.8em;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Notifications */
+
 .error-container {
-    padding: 10px 15px;
+    padding: 15px 20px; 
     border-radius: 5px;
     margin-top: 10px;
+    margin-left: auto; 
+    margin-right: auto; 
     display: flex;
     align-items: center;
-    gap: 10px; /* Spacing between icon and text */
+    gap: 10px; 
+    max-width: 500px; 
 }
+
 
 .error-icon {
-    font-size: 20px; /* Adjust as needed */
-}
+    font-size: 20px;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
 
 .dark-error {
-    background-color: #d32f2f; /* Dark mode error background */
+    background-color: #d32f2f; 
     color: white;
 }
 
 .light-error {
-    background-color: #ffcdd2; /* Light mode error background */
+    background-color: #ffcdd2;
     color: #d32f2f;
 }
 
 .success-container {
-    background-color: #e6ffe6; /* Default light green background */
-    border: 1px solid #00cc00; /* Default green border */
+    background-color: #e6ffe6;
+    border: 1px solid #00cc00;
     padding: 10px;
     border-radius: 5px;
     margin: 10px 0;
@@ -211,141 +424,14 @@ button.uniform-width:focus {
     margin-right: 10px;
 }
 
-.sidebar-menu {
-    background-color: #333;
-    position: fixed;
-    top: 0;
-    left: -250px;
-    height: 100%;
-    width: 250px;
-    transition: left 0.3s ease-in-out; 
-    overflow-y: auto; 
-    border-right: 1px solid #555;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-.sidebar-menu ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.sidebar-menu ul li {
-    padding: 10px;
-    border-bottom: 1px solid #555;
-}
-
-.sidebar-menu ul li:last-child {
-    border-bottom: none;
-}
-
-.sidebar-menu ul li a {
-    text-decoration: none;
-}
-
-
-.dark-sidebar {
-    background-color: #333;
-    color: white; 
-}
-
-
-.light-sidebar {
-    background-color: #f5f5f5;
-    color: black;
-}
-
-.dark-mode-text {
-    color: white; 
-}
-
-.light-mode-text {
-    color: black; 
-}
-
-a > span {
-    display: block;
-}
-
-.app-header-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000; 
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 20px;
-    width: 100%;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
-    font-size: 14px; 
-    line-height: 1.2; 
-    display: flex;
-    flex-direction: column;
-
-}
-
-.dark-header {
-    color: white; 
-}
-
-.light-header {
-    color: black;
-}
-
-.dark-mode-text {
-    color: white; 
-}
-
-.light-mode-text {
-    color: black; 
-}
-
-.sidebar-toggle-button {
-    font-size: 24px; 
-    background-color: transparent; 
-    border: none; 
-    cursor: pointer; 
-    margin-left: 10px; 
-    padding: 10px; 
-    color: inherit; 
-    outline: none;
-    position: absolute; 
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%); 
-}
-
-.sidebar-toggle-button:hover {
-    opacity: 0.7; /* Adding a slight opacity change on hover */
-}
-
-.app-header-title {
-    font-size: 24px;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100%;
-    flex-grow: 1;
-}
-
-.dark-mode-text {
-    color: white;
-}
-
-.light-mode-text {
-    color: black;
-}
-
-.dark-toggle-button {
-    color: #fff;
-}
-
-.light-toggle-button {
-    color: #333;
+@media only screen and (max-width: 835px) {
+    .App-body {
+        flex-direction: column;
+    }
+    
+    .card {
+        width: 100%; 
+        max-width: none; 
+        margin: 15px 0; 
+    }
 }

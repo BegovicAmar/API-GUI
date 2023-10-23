@@ -90,6 +90,8 @@ function App() {
     const { setTheme, value: mode } = useThemeContext();
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [sidebarVisible, setSidebarVisible] = useState(false);
+
     const [availabilityData, setAvailabilityData] = useState<Array<{ categoryId: string; lowestAvailability: number }>>(
         []
     );
@@ -404,7 +406,6 @@ function App() {
 
     function handleLastNameClick(): void {
         const newLastName = generateShortLastName();
-        // setLastName(newLastName);
         setInputData((prevData) => ({
             ...prevData,
             email: generateRandomEmail(newLastName),
@@ -437,6 +438,10 @@ function App() {
         setSelectedResourceCategoryId(event.target.value);
     };
 
+    const handleToggleSidebar = () => {
+        setSidebarVisible(!sidebarVisible);
+    };
+
     return (
         <div className={clsx('App', { dark: mode === 'dark' })}>
             {isLoading && <LoaderComponent type="reservation" />}
@@ -452,8 +457,7 @@ function App() {
                                 'light-error': mode === 'light',
                             })}
                         >
-                            <span className="error-icon">⚠️</span>{' '}
-                            {/* You can replace with an actual error icon if you have one */}
+                            <span className="error-icon">⚠️</span>
                             {errorMessage}
                         </div>
                         <Link
@@ -472,130 +476,147 @@ function App() {
                 )
             ) : (
                 <>
-                    <AppHeader mode={mode} title="API Toolbelt" setTheme={setTheme} />
-                    <Sidebar mode={mode} />
-                    <div className="center-content">
-                        <AddEnterprise addEnterprise={addEnterprise} />
-                        <CustomSelect
-                            name="Enterprise"
-                            values={enterprises.map(({ id, name }) => ({
-                                value: id,
-                                name: { [DEFAULT_LANGUAGE_CODE]: name },
-                            }))}
-                            selectedValue={selectedEnterpriseId}
-                            onChange={handleSelectEnterprise}
-                        />
-                        <CustomSelect
-                            name="Resource category"
-                            values={resourceCategories.map(({ Id, Name }) => {
-                                const matchedAvailability = availabilityData.find((data) => data.categoryId === Id);
-                                const availability = matchedAvailability
-                                    ? matchedAvailability.lowestAvailability.toString()
-                                    : undefined;
-                                return {
-                                    value: Id,
-                                    name: Name,
-                                    availability: availability,
-                                };
-                            })}
-                            selectedValue={selectedResourceCategoryId}
-                            onChange={handleResourceCategoryIdChange}
-                        />
-                        <CustomSelect
-                            name="Age Category"
-                            values={ageCategories.map(({ Id, Name }) => ({
-                                value: Id,
-                                name: Name,
-                            }))}
-                            selectedValue={selectedAgeCategoryId}
-                            onChange={handleAgeCategoryIdChange}
-                        />
-                        <CustomSelect
-                            name="Rate"
-                            values={rates.map(({ Id, Name }) => ({
-                                value: Id,
-                                name: Name,
-                            }))}
-                            selectedValue={selectedRateId}
-                            onChange={handleRateIdChange}
-                        />
-                        <button className="uniform-width" onClick={handleLastNameClick}>
-                            Randomize user
-                        </button>
-                        <CustomInput
-                            name="LastName"
-                            value={inputData.lastName}
-                            onChange={(event) => handleOnDateChange('lastName', event)}
-                        />
-                        <CustomInput
-                            name="Email"
-                            value={inputData.email}
-                            onChange={(event) => handleOnDateChange('email', event)}
-                        />
-                        <DatePicker
-                            name="StartUtc"
-                            value={inputData.startUtc}
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                handleOnDateChange('startUtc', event)
-                            }
-                        />
-                        <DatePicker
-                            name="EndUtc"
-                            value={inputData.endUtc}
-                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                handleOnDateChange('endUtc', event)
-                            }
-                        />
-                        <button
-                            className="uniform-width"
-                            onClick={() =>
-                                createReservation({
-                                    ageCategoryId: selectedAgeCategoryId,
-                                    resourceCategoryId: selectedResourceCategoryId,
-                                    bookingEngines: configurationData?.BookingEngines,
-                                    enterprises: configurationData?.Enterprises,
-                                })
-                            }
-                        >
-                            Create reservation
-                        </button>
-                    </div>
-                    {errorMessage && (
-                        <div
-                            className={clsx('error-container', {
-                                'dark-error': mode === 'dark',
-                                'light-error': mode === 'light',
-                            })}
-                        >
-                            <span className="error-icon">⚠️</span>
-                            {errorMessage}
-                        </div>
-                    )}
-                    <div
-                        style={{ fontSize: '20px', marginTop: '1px' }}
-                        className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
-                    >
-                        {reservationDetails === null
-                            ? 'Click ⬆️ to create reservation'
-                            : renderReservations(reservationDetails)}
-                    </div>
-                    {jsonData && (
-                        <button
-                            className={isQRZoomed ? 'qr-zoomed-container' : ''}
-                            onClick={() => setQRZoomed(!isQRZoomed)}
-                        >
-                            <div
-                                className="qr-wrapper"
-                                style={{
-                                    transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)',
-                                    transition: 'transform 0.3s',
-                                }}
-                            >
-                                <QRCode value={jsonData} />
+                    <AppHeader
+                        mode={mode}
+                        title="Mews lite"
+                        setTheme={setTheme}
+                        onToggleSidebar={handleToggleSidebar}
+                    />
+                    <Sidebar mode={mode} isVisible={sidebarVisible} onClose={() => setSidebarVisible(false)} />
+                    <div className="App-body">
+                        <div className={mode === 'dark' ? 'dark-card' : 'card'}>
+                            <div className="center-content">
+                                <CustomSelect
+                                    name="Choose Enterprise"
+                                    values={enterprises.map(({ id, name }) => ({
+                                        value: id,
+                                        name: { [DEFAULT_LANGUAGE_CODE]: name },
+                                    }))}
+                                    selectedValue={selectedEnterpriseId}
+                                    onChange={handleSelectEnterprise}
+                                />
+                                <span className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>or</span>
+                                <AddEnterprise addEnterprise={addEnterprise} />
+                                <CustomSelect
+                                    name="Resource Category"
+                                    values={resourceCategories.map(({ Id, Name }) => {
+                                        const matchedAvailability = availabilityData.find(
+                                            (data) => data.categoryId === Id
+                                        );
+                                        const availability = matchedAvailability
+                                            ? matchedAvailability.lowestAvailability.toString()
+                                            : undefined;
+                                        return {
+                                            value: Id,
+                                            name: Name,
+                                            availability: availability,
+                                        };
+                                    })}
+                                    selectedValue={selectedResourceCategoryId}
+                                    onChange={handleResourceCategoryIdChange}
+                                />
+                                <CustomSelect
+                                    name="Age Category"
+                                    values={ageCategories.map(({ Id, Name }) => ({
+                                        value: Id,
+                                        name: Name,
+                                    }))}
+                                    selectedValue={selectedAgeCategoryId}
+                                    onChange={handleAgeCategoryIdChange}
+                                />
+                                <CustomSelect
+                                    name="Rate"
+                                    values={rates.map(({ Id, Name }) => ({
+                                        value: Id,
+                                        name: Name,
+                                    }))}
+                                    selectedValue={selectedRateId}
+                                    onChange={handleRateIdChange}
+                                />
+                                <button className="uniform-width" onClick={handleLastNameClick}>
+                                    Randomize Guest
+                                </button>
+                                <CustomInput
+                                    name="Last Name"
+                                    value={inputData.lastName}
+                                    onChange={(event) => handleOnDateChange('lastName', event)}
+                                />
+                                <CustomInput
+                                    name="Email"
+                                    value={inputData.email}
+                                    onChange={(event) => handleOnDateChange('email', event)}
+                                />
+                                <DatePicker
+                                    name="StartUtc"
+                                    value={inputData.startUtc}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                        handleOnDateChange('startUtc', event)
+                                    }
+                                />
+                                <DatePicker
+                                    name="EndUtc"
+                                    value={inputData.endUtc}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                        handleOnDateChange('endUtc', event)
+                                    }
+                                />
+                                <button
+                                    className="uniform-width"
+                                    onClick={() =>
+                                        createReservation({
+                                            ageCategoryId: selectedAgeCategoryId,
+                                            resourceCategoryId: selectedResourceCategoryId,
+                                            bookingEngines: configurationData?.BookingEngines,
+                                            enterprises: configurationData?.Enterprises,
+                                        })
+                                    }
+                                >
+                                    Create Reservation
+                                </button>
+                                {errorMessage && (
+                                    <div
+                                        className={clsx('error-container', {
+                                            'dark-error': mode === 'dark',
+                                            'light-error': mode === 'light',
+                                        })}
+                                    >
+                                        <span className="error-icon">⚠️</span>
+                                        {errorMessage}
+                                    </div>
+                                )}
                             </div>
-                            <span>Click QR code to enlarge</span>
-                        </button>
-                    )}
+                        </div>
+                        {reservationDetails && (
+                            <div className={mode === 'dark' ? 'dark-card' : 'card'}>
+                                <div className="center-content">
+                                    <div
+                                        style={{ fontSize: '20px', marginTop: '1px' }}
+                                        className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}
+                                    >
+                                        {renderReservations(reservationDetails)}
+
+                                        {jsonData && (
+                                            <button
+                                                className={isQRZoomed ? 'qr-zoomed-container' : ''}
+                                                onClick={() => setQRZoomed(!isQRZoomed)}
+                                            >
+                                                <div
+                                                    className="qr-wrapper"
+                                                    style={{
+                                                        transform: isQRZoomed ? 'scale(2.5)' : 'scale(1)',
+                                                        transition: 'transform 0.3s',
+                                                    }}
+                                                >
+                                                    <QRCode value={jsonData} />
+                                                </div>
+                                                <span>Click QR code to enlarge</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </>
             )}
         </div>

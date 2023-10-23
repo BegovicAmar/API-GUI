@@ -38,9 +38,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                 setSuccessMessage(`Enterprise "${enterpriseName}" added successfully`);
                 setTimeout(() => {
                     setSuccessMessage(null);
-                }, 5000); // Clear the message after 3 seconds
-
-                // Clear the input fields
+                }, 5000);
                 enterpriseIDRef.current.value = '';
             } catch (error) {
                 // eslint-disable-next-line max-len
@@ -67,46 +65,41 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
     return (
         <div className="fields-wrapper">
             <button className="uniform-width" onClick={() => setShowHiddenFields(!showHiddenFields)}>
-                Add Enterprise
+                {showHiddenFields ? 'Hide Add Enterprise' : 'Add Enterprise'}
             </button>
-            <div className="center-content">
-                {showHiddenFields && (
-                    <>
-                        <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
-                            EnterpriseID/ConfigurationId:
-                            <input className="uniform-width" type="text" ref={enterpriseIDRef} />
-                        </label>
-                        <button className="uniform-width" onClick={addEnterpriseToDropdown}>
-                            Submit
-                        </button>
-                        {validationError && (
-                            <div
-                                className={clsx('error-container', {
-                                    'dark-error': mode === 'dark',
-                                    'light-error': mode === 'light',
-                                })}
-                            >
-                                <span className="error-icon">⚠️</span>
-                                {validationError}
-                            </div>
-                        )}
-                        {successMessage && (
-                            <div
-                                className={clsx(
-                                    'success-container',
-                                    {
-                                        'dark-success': mode === 'dark',
-                                        'light-success': mode === 'light',
-                                    } // Conditional classes
-                                )}
-                            >
-                                <span className="success-icon">✅</span> {/* Display a checkmark as a success icon */}
-                                {successMessage}
-                            </div>
-                        )}
-                    </>
-                )}
-            </div>
+            {showHiddenFields && (
+                <div className="fields-wrapper">
+                    <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
+                        EnterpriseID/ConfigurationId:
+                        <input className="uniform-width" type="text" ref={enterpriseIDRef} />
+                    </label>
+                    <button className="uniform-width" onClick={addEnterpriseToDropdown}>
+                        Submit
+                    </button>
+                    {validationError && (
+                        <div
+                            className={clsx('error-container', {
+                                'dark-error': mode === 'dark',
+                                'light-error': mode === 'light',
+                            })}
+                        >
+                            <span className="error-icon">⚠️</span>
+                            {validationError}
+                        </div>
+                    )}
+                    {successMessage && (
+                        <div
+                            className={clsx('success-container', {
+                                'dark-success': mode === 'dark',
+                                'light-success': mode === 'light',
+                            })}
+                        >
+                            <span className="success-icon">✅</span>
+                            {successMessage}
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
