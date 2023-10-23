@@ -1,51 +1,47 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import clsx from 'clsx';
 
 interface SidebarProps {
     mode: 'dark' | 'light';
     isVisible: boolean;
     headerHeight?: number;
-    onClose: () => void; // Added this callback prop
+    onClose: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ mode, isVisible, headerHeight: propHeaderHeight, onClose }) => {
+const Sidebar: React.FC<SidebarProps> = ({ mode, isVisible, headerHeight, onClose }) => {
     const [localHeaderHeight, setLocalHeaderHeight] = useState(0);
+    const sidebarRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (!propHeaderHeight) {
-            const headerElem = document.querySelector('.app-header-container') as HTMLElement | null;
+        if (!headerHeight) {
+            const headerElem = document.querySelector('.app-header-container');
             if (headerElem) {
-                setLocalHeaderHeight(headerElem.offsetHeight);
+                setLocalHeaderHeight(headerElem.getBoundingClientRect().height);
             }
         }
-    }, [propHeaderHeight]);
+    }, [headerHeight]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            const sidebarElement = document.querySelector('.sidebar-menu');
-            const toggleElement = document.querySelector('.sidebar-toggle-button');
-
-            if (
-                sidebarElement &&
-                !sidebarElement.contains(event.target as Node) &&
-                (!toggleElement || !toggleElement.contains(event.target as Node)) &&
-                isVisible
-            ) {
+            if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node) && isVisible) {
                 onClose();
             }
         };
 
-        document.addEventListener('mousedown', handleClickOutside);
+        const timeoutId = setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 0);
 
         return () => {
-            document.removeEventListener('mousedown', handleClickOutside);
+            clearTimeout(timeoutId);
+            document.removeEventListener('click', handleClickOutside);
         };
     }, [isVisible, onClose]);
 
-    const finalHeaderHeight = propHeaderHeight || localHeaderHeight;
+    const finalHeaderHeight = headerHeight || localHeaderHeight;
 
     return (
-        <div className="sidebar-container" style={{ top: `${finalHeaderHeight}px` }}>
+        <div className="sidebar-container" style={{ top: `${finalHeaderHeight}px` }} ref={sidebarRef}>
             <nav
                 className={clsx('sidebar-menu', {
                     'dark-sidebar': mode === 'dark',
