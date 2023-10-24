@@ -35,6 +35,7 @@ import { AddEnterprise, PoorEnterprise } from './components/AddEnterprise';
 import { Link, useParams } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import AppHeader from './components/AppHeader';
+import EmailPreview from './components/EmailPreview';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -91,7 +92,7 @@ function App() {
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [sidebarVisible, setSidebarVisible] = useState(false);
-
+    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     const [availabilityData, setAvailabilityData] = useState<Array<{ categoryId: string; lowestAvailability: number }>>(
         []
     );
@@ -616,6 +617,10 @@ function App() {
                                                 <span>Click QR code to enlarge</span>
                                             </button>
                                         )}
+                                    </div>
+                                    <div>
+                                        <button onClick={() => setIsOverlayOpen(true)}>Show Email Preview</button>
+                                        <EmailPreview isOpen={isOverlayOpen} onClose={() => setIsOverlayOpen(false)} />
                                     </div>
                                 </div>
                             </div>
