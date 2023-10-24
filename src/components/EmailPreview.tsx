@@ -1646,7 +1646,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose }) => {
                          <table width="100%" height="100%" role="presentation" border="0" cellpadding="0" cellspacing="0">
                           <tbody>
                            <tr>
-                            <td>
+                            <td align="center">
                              <p style="margin: 0; font-size: 16px; line-height: 24px; font-weight: 400; ">
                               Scan this QR code on arrival.
                              </p>
