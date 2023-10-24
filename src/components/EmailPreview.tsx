@@ -503,7 +503,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose }) => {
                               <tbody>
                                <tr>
                                 <td class="ghostButtonContent" style="color: #3E3BD9; font-size: 18px; font-weight: bold; line-height: 100%; text-align: center;" align="center">
-                                 <a style="color: #3E3BD9; display: block; text-decoration: none; padding: 16px;" href="">
+                                 <a style="color: #3E3BD9; display: block; text-decoration: none; padding: 16px;" href=""; class="disabled">
                                   Manage reservation
                                  </a>
                                 </td>
@@ -591,7 +591,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose }) => {
                               <tbody>
                                <tr>
                                 <td class="raisedButtonContent" style="color: #FFFFFF; font-size: 18px; font-weight: bold; line-height: 100%; text-align: center;" align="center">
-                                 <a style="color: #FFFFFF; display: block; text-decoration: none; padding: 16px;" href="">
+                                 <a style="color: #FFFFFF; display: block; text-decoration: none; padding: 16px;" href=""; class="disabled">
                                   Add your info
                                  </a>
                                 </td>
@@ -1541,7 +1541,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose }) => {
                               <tbody>
                                <tr>
                                 <td class="ghostButtonContent" style="color: #3E3BD9; font-size: 18px; font-weight: bold; line-height: 100%; text-align: center;" align="center">
-                                 <a style="color: #3E3BD9; display: block; text-decoration: none; padding: 16px;" href="">
+                                 <a style="color: #3E3BD9; display: block; text-decoration: none; padding: 16px;" href=""; class="disabled">
                                   Chat with us
                                  </a>
                                 </td>
@@ -1802,7 +1802,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose }) => {
                           <tbody>
                            <tr>
                             <td align="center">
-                             <a href="">
+                             <a href=""; class="disabled">
                               <img style="border: 0; -ms-interpolation-mode: bicubic; height: auto; max-width: 120px; width: 120px; outline: none; text-decoration: none;" width="120" src="https://cdn.mews-develop.com/Content/Platform/Images/add-to-apple-wallet-logo.png?v=79e64f8a" alt="Add to apple wallet"/>
                              </a>
                             </td>
