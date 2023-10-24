@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import './App.css';
 import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
@@ -93,6 +93,8 @@ function App() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+    const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+    const qrCodeRef = useRef<HTMLDivElement>(null);
     const [availabilityData, setAvailabilityData] = useState<Array<{ categoryId: string; lowestAvailability: number }>>(
         []
     );
@@ -435,6 +437,23 @@ function App() {
         selectEnterprise(event.target.value);
     };
 
+    useEffect(() => {
+        if (qrCodeRef.current) {
+            const observer = new MutationObserver(() => {
+                const canvas = qrCodeRef.current?.querySelector('canvas');
+                if (canvas) {
+                    setQrCodeDataUrl(canvas.toDataURL('image/png'));
+                }
+            });
+
+            observer.observe(qrCodeRef.current, {
+                childList: true,
+            });
+
+            return () => observer.disconnect();
+        }
+    }, [qrCodeDataUrl]);
+
     const handleResourceCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedResourceCategoryId(event.target.value);
     };
@@ -619,8 +638,19 @@ function App() {
                                         )}
                                     </div>
                                     <div>
-                                        <button onClick={() => setIsOverlayOpen(true)}>Show Email Preview</button>
-                                        <EmailPreview isOpen={isOverlayOpen} onClose={() => setIsOverlayOpen(false)} />
+                                        <div>
+                                            <button onClick={() => setIsOverlayOpen(true)}>Show Email Preview</button>
+                                            {isOverlayOpen && (
+                                                <EmailPreview
+                                                    qrCodeDataUrl={qrCodeDataUrl}
+                                                    onClose={() => setIsOverlayOpen(false)}
+                                                    isOpen={isOverlayOpen}
+                                                />
+                                            )}
+                                            <div ref={qrCodeRef} style={{ display: 'none' }}>
+                                                {jsonData && <QRCode value={jsonData} />}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
