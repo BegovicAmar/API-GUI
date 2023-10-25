@@ -1,4 +1,4 @@
-import React, { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import React, { ChangeEvent, useCallback, useEffect, useRef, useState } from 'react';
 import './App.css';
 import { generateRandomEmail, generateShortLastName, getEndDateFromStartDate, getTodaysDate } from './utils';
 import {
@@ -23,7 +23,7 @@ import {
     ResourceCategory,
 } from './api';
 import clsx from 'clsx';
-import QRCode from 'qrcode.react';
+import QRCode, { QRCodeSVG } from 'qrcode.react';
 import LoaderComponent from './components/LoaderComponent';
 import moment from 'moment-timezone';
 import { useThemeContext } from './hooks/useThemeValue';
@@ -35,6 +35,8 @@ import { AddEnterprise, PoorEnterprise } from './components/AddEnterprise';
 import { Link, useParams } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import AppHeader from './components/AppHeader';
+import EmailPreview from './components/EmailPreview';
+import Portal from './components/Portal';
 
 const renderReservations = (reservationsGroupCreateResponse?: ReservationsGroupCreateResponse) => {
     if (!reservationsGroupCreateResponse) return null;
@@ -91,7 +93,9 @@ function App() {
     const randomLastName = generateShortLastName();
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [sidebarVisible, setSidebarVisible] = useState(false);
-
+    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+    // const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
+    const qrCodeRef = useRef<HTMLDivElement>(null);
     const [availabilityData, setAvailabilityData] = useState<Array<{ categoryId: string; lowestAvailability: number }>>(
         []
     );
@@ -434,6 +438,23 @@ function App() {
         selectEnterprise(event.target.value);
     };
 
+    // useEffect(() => {
+    //     if (qrCodeRef.current) {
+    //         const observer = new MutationObserver(() => {
+    //             const canvas = qrCodeRef.current?.querySelector('canvas');
+    //             if (canvas) {
+    //                 setQrCodeDataUrl(canvas.toDataURL('image/png'));
+    //             }
+    //         });
+    //
+    //         observer.observe(qrCodeRef.current, {
+    //             childList: true,
+    //         });
+    //
+    //         return () => observer.disconnect();
+    //     }
+    // }, [qrCodeDataUrl]);
+
     const handleResourceCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedResourceCategoryId(event.target.value);
     };
@@ -533,9 +554,11 @@ function App() {
                                     selectedValue={selectedRateId}
                                     onChange={handleRateIdChange}
                                 />
-                                <button className="uniform-width" onClick={handleLastNameClick}>
-                                    Randomize Guest
-                                </button>
+                                <div className="fields-wrapper">
+                                    <button className="uniform-width" onClick={handleLastNameClick}>
+                                        Randomize Guest
+                                    </button>
+                                </div>
                                 <CustomInput
                                     name="Last Name"
                                     value={inputData.lastName}
@@ -560,19 +583,21 @@ function App() {
                                         handleOnDateChange('endUtc', event)
                                     }
                                 />
-                                <button
-                                    className="uniform-width"
-                                    onClick={() =>
-                                        createReservation({
-                                            ageCategoryId: selectedAgeCategoryId,
-                                            resourceCategoryId: selectedResourceCategoryId,
-                                            bookingEngines: configurationData?.BookingEngines,
-                                            enterprises: configurationData?.Enterprises,
-                                        })
-                                    }
-                                >
-                                    Create Reservation
-                                </button>
+                                <div className="fields-wrapper">
+                                    <button
+                                        className="uniform-width"
+                                        onClick={() =>
+                                            createReservation({
+                                                ageCategoryId: selectedAgeCategoryId,
+                                                resourceCategoryId: selectedResourceCategoryId,
+                                                bookingEngines: configurationData?.BookingEngines,
+                                                enterprises: configurationData?.Enterprises,
+                                            })
+                                        }
+                                    >
+                                        Create Reservation
+                                    </button>
+                                </div>
                                 {errorMessage && (
                                     <div
                                         className={clsx('error-container', {
@@ -607,12 +632,30 @@ function App() {
                                                         transition: 'transform 0.3s',
                                                     }}
                                                 >
-                                                    <QRCode value={jsonData} />
+                                                    <QRCodeSVG value={jsonData} />
                                                 </div>
                                                 <span>Click QR code to enlarge</span>
                                             </button>
                                         )}
                                     </div>
+                                    {jsonData && (
+                                        <div>
+                                            <button onClick={() => setIsOverlayOpen(true)}>Show Email Preview</button>
+                                            {isOverlayOpen && (
+                                                <Portal containerId="portal">
+                                                    <EmailPreview
+                                                        onClose={() => setIsOverlayOpen(false)}
+                                                        isOpen={isOverlayOpen}
+                                                    >
+                                                        <QRCodeSVG value={jsonData} size={300} />
+                                                    </EmailPreview>
+                                                </Portal>
+                                            )}
+                                            <div ref={qrCodeRef} style={{ display: 'none' }}>
+                                                {jsonData && <QRCode value={jsonData} />}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

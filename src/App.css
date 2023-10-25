@@ -32,8 +32,7 @@
 
 .card {
     background-color: white;
-    border-radius: 12px; 
-    padding: 15px;      
+    border-radius: 12px;  
     margin: 15px;       
     max-width: 450px;  
     overflow: hidden;
@@ -422,6 +421,47 @@ a > span {
 
 .success-icon {
     margin-right: 10px;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; /* Make sure the overlay is on top of other content */
+  }
+  
+  .content {
+    background-color: #fff;
+    margin: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    position: relative;
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 30px;
+    right: 10px;
+    padding: 10px 15px;
+    cursor: pointer;
+  }
+
+  .email-content {
+    position: relative;
+    z-index: 1;
+  }
+  
+  a.disabled {
+    pointer-events: none;
+    cursor: default;
 }
 
 @media only screen and (max-width: 835px) {
