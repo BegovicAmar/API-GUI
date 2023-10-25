@@ -2,18 +2,19 @@
 /* eslint-disable max-len */
 /* eslint-disable react/no-danger */
 import React from 'react';
+import ReactDOMServer from 'react-dom/server';
 
 interface EmailPreviewProps {
     isOpen: boolean;
     onClose: () => void;
-    qrCodeDataUrl: string;
+    children: React.ReactNode;
 }
 
-const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, qrCodeDataUrl }) => {
+const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, children }) => {
     if (!isOpen) return null;
 
     const emailHtml = `
-    ﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
  <head>
   <meta name="viewport" content="width=device-width"/>
@@ -149,9 +150,6 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, qrCodeData
   <![endif]-->
  </head>
  <body style="margin: 0; padding: 0; background-color: #E5E5E5; font-family: &#39;Montserrat&#39;, &#39;Helvetica Neue&#39;, SagoeUI, sans-serif; color: #101B2C; height: 100%; width: 100%;">
-  <script type="application/ld+json">
-   [{"@context":"http://schema.org","@type":"LodgingReservation","reservationNumber":"195","reservationStatus":"http://schema.org/Confirmed","checkinDate":"2023-10-23T15:00:00Z","checkoutDate":"2023-10-25T12:00:00Z","modifiedTime":"2023-10-23T15:23:10Z","underName":{"@type":"Person","name":"New"},"reservationFor":{"@type":"LodgingBusiness","name":"Mews Hotel","telephone":"(555) 555-1234","address":{"@type":"PostalAddress","streetAddress":"Main Street 4860 test","addressLocality":"Berlin","addressRegion":"DE-BE","postalCode":"10557","addressCountry":"DE"}},"modifyReservationUrl":"https://app.mews-develop.com/User/SignIn/3E57DEEC4A274CCCA11AB0A400FD8E44-DFCA3158B3C3647CA41109760A035B4?utm_campaign=checkinCTA&utm_medium=email&utm_source=confirmation&language=en-US&enterpriseId=8d99755d-d50d-4c14-96fe-b06600962f8f"},{"@context":"http://schema.org","@type":"LodgingReservation","reservationNumber":"196","reservationStatus":"http://schema.org/Confirmed","checkinDate":"2023-10-27T15:00:00Z","checkoutDate":"2023-10-28T12:00:00Z","modifiedTime":"2023-10-23T15:23:10Z","underName":{"@type":"Person","name":"New"},"reservationFor":{"@type":"LodgingBusiness","name":"Mews Hotel","telephone":"(555) 555-1234","address":{"@type":"PostalAddress","streetAddress":"Main Street 4860 test","addressLocality":"Berlin","addressRegion":"DE-BE","postalCode":"10557","addressCountry":"DE"}},"modifyReservationUrl":"https://app.mews-develop.com/User/SignIn/3E57DEEC4A274CCCA11AB0A400FD8E44-DFCA3158B3C3647CA41109760A035B4?utm_campaign=checkinCTA&utm_medium=email&utm_source=confirmation&language=en-US&enterpriseId=8d99755d-d50d-4c14-96fe-b06600962f8f"},{"@context":"http://schema.org","@type":"LodgingReservation","reservationNumber":"197","reservationStatus":"http://schema.org/Confirmed","checkinDate":"2023-10-29T15:00:00Z","checkoutDate":"2023-10-30T12:00:00Z","modifiedTime":"2023-10-23T15:23:10Z","underName":{"@type":"Person","name":"New"},"reservationFor":{"@type":"LodgingBusiness","name":"Mews Hotel","telephone":"(555) 555-1234","address":{"@type":"PostalAddress","streetAddress":"Main Street 4860 test","addressLocality":"Berlin","addressRegion":"DE-BE","postalCode":"10557","addressCountry":"DE"}},"modifyReservationUrl":"https://app.mews-develop.com/User/SignIn/3E57DEEC4A274CCCA11AB0A400FD8E44-DFCA3158B3C3647CA41109760A035B4?utm_campaign=checkinCTA&utm_medium=email&utm_source=confirmation&language=en-US&enterpriseId=8d99755d-d50d-4c14-96fe-b06600962f8f"}]
-  </script>
   <center>
    <table id="bodyTable" style="margin: 0; padding: 0; background-color: #E5E5E5; height: 100%; width: 100%;" width="100%" height="100%" role="presentation" border="0" cellpadding="0" cellspacing="0">
     <tbody>
@@ -1679,7 +1677,10 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, qrCodeData
                           <tbody>
                            <tr>
                             <td align="center">
-                            <img src="${qrCodeDataUrl}" alt="QR Code" />                            </td>
+                            ${ReactDOMServer.renderToString(
+                                children as React.ReactElement<any, string | React.JSXElementConstructor<any>>
+                            )}                          
+                            </td>
                            </tr>
                           </tbody>
                          </table>
