@@ -185,7 +185,8 @@ function App() {
             setErrorMessage(null);
             setReservationDetails(null);
             setIsLoading(true);
-
+            console.log('bookingEngines:', bookingEngines);
+            console.log('rates:', rates);
             try {
                 const selectedEnterprise = enterprises?.find((enterprise) => enterprise.Id === selectedEnterpriseId);
                 const selectedConfiguration = bookingEngines?.[0];
@@ -201,7 +202,12 @@ function App() {
                 const startMoment = moment.tz(`${inputData.startUtc}T00:00:00`, timezone);
                 const endMoment = moment.tz(`${inputData.endUtc}T00:00:00`, timezone);
 
-                const rateId = selectedRateId || rates[0].Id;
+                const rateId = selectedRateId || (rates.length > 0 ? rates[0].Id : null);
+                if (!rateId) {
+                    console.error('Rate ID is missing');
+                    setIsLoading(false);
+                    return;
+                }
 
                 const reservation = createSingleReservation({
                     Identifier: Math.random().toString(),
