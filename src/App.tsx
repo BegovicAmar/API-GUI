@@ -372,14 +372,20 @@ function App() {
             !isReservationBeingCreated
         ) {
             setIsBeingCreated(true);
+
             createReservation({
                 ageCategoryId: selectedAgeCategoryId,
                 resourceCategoryId: selectedResourceCategoryId,
                 bookingEngines: configurationData?.BookingEngines,
                 enterprises: configurationData?.Enterprises,
-            }).finally(() => {
-                setIsBeingCreated(false);
-            });
+            })
+                .catch((error) => {
+                    console.error('Reservation failed', error);
+                })
+                .finally(() => {
+                    setIsBeingCreated(false);
+                    setIsOverlayOpen(true);
+                });
         }
     }, [
         configurationData?.BookingEngines,
@@ -390,6 +396,7 @@ function App() {
         selectedResourceCategoryId,
         shouldCreateReservation,
     ]);
+
     const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(event.target.value);
     };
