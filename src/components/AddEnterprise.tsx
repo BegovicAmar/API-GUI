@@ -18,7 +18,6 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
     const [successMessage, setSuccessMessage] = React.useState<string | null>(null);
     const mode = useThemeContextValue();
     const enterpriseIDRef = useRef<HTMLInputElement>(null);
-    // const enterpriseNameRef = useRef<HTMLInputElement>(null);
     const [validationError, setValidationError] = useState<string | null>(null);
 
     const addEnterpriseToDropdown = async () => {
@@ -41,8 +40,6 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                 }, 5000);
                 enterpriseIDRef.current.value = '';
             } catch (error) {
-                // eslint-disable-next-line max-len
-                // Only enters this block if fetchEnterpriseConfiguration throws an error (e.g., due to a 400 status code)
                 console.error('Error validating EnterpriseID:', error);
                 setValidationError('Invalid EnterpriseID.');
             }
@@ -83,7 +80,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                                 'light-error': mode === 'light',
                             })}
                         >
-                            <span className="error-icon">⚠️</span>
+                            <span className="error-icon">&#9888;</span>
                             {validationError}
                         </div>
                     )}
@@ -94,7 +91,7 @@ export const AddEnterprise = ({ addEnterprise }: AddEnterpriseProps) => {
                                 'light-success': mode === 'light',
                             })}
                         >
-                            <span className="success-icon">✅</span>
+                            <span className="success-icon">&#9989;</span>
                             {successMessage}
                         </div>
                     )}
