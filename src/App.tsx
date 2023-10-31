@@ -103,6 +103,7 @@ function App() {
     const hasEnterpriseIdInUrl = params?.['enterpriseId'] != null;
     const [shouldCreateReservation, setShouldCreateReservation] = useState<boolean>(hasEnterpriseIdInUrl);
     const [isReservationBeingCreated, setIsBeingCreated] = useState<boolean>(false);
+    const [isPromiseLoading, setIsPromiseLoading] = useState<null | undefined | Promise<void | undefined | null>>(null);
     const [selectedEnterpriseId, selectEnterprise] = useState<string>(
         params['enterpriseId'] ?? '8a51f050-8467-4e92-84d5-abc800c810b8'
     );
@@ -273,96 +274,100 @@ function App() {
         ]
     );
 
-    useEffect(
-        () => {
-            try {
-                const configDataPromise = fetchEnterpriseConfiguration(selectedEnterpriseId);
-                configDataPromise.then((configData) => {
-                    if (!isSuccessfulConfigurationResponse(configData)) {
-                        setErrorMessage(configData.Message);
-                        setIsLoading(false);
-                        return;
-                    }
-                    setConfigurationData(configData);
-                    setAgeCategories(configData.AgeCategories);
+    const loadData = useCallback(() => {
+        try {
+            const configDataPromise = fetchEnterpriseConfiguration(selectedEnterpriseId);
+            return configDataPromise.then((configData) => {
+                console.count('TOHLE TAKY');
+                if (!isSuccessfulConfigurationResponse(configData)) {
+                    setErrorMessage(configData.Message);
+                    setIsLoading(false);
+                    return;
+                }
+                setConfigurationData(configData);
+                setAgeCategories(configData.AgeCategories);
 
-                    if (
-                        !selectedAgeCategoryId ||
-                        !configData.AgeCategories.find((cat) => cat.Id === selectedAgeCategoryId)
-                    ) {
-                        setSelectedAgeCategoryId(configData.AgeCategories[0]?.Id || null);
-                    }
+                if (
+                    !selectedAgeCategoryId ||
+                    !configData.AgeCategories.find((cat) => cat.Id === selectedAgeCategoryId)
+                ) {
+                    setSelectedAgeCategoryId(configData.AgeCategories[0]?.Id || null);
+                }
 
-                    if (configData?.BookingEngines?.[0]) {
-                        const serviceId = configData?.BookingEngines?.[0].ServiceId;
-                        const bookingEngineId = configData?.BookingEngines?.[0].Id;
+                if (configData?.BookingEngines?.[0]) {
+                    const serviceId = configData?.BookingEngines?.[0].ServiceId;
+                    const bookingEngineId = configData?.BookingEngines?.[0].Id;
 
-                        const resourceCategoryPromise = fetchResourceCategories({
-                            ServiceId: serviceId,
-                        });
-                        resourceCategoryPromise.then((resourceCategoryResponse) => {
-                            setResourceCategories(resourceCategoryResponse.ResourceCategories);
-                            if (resourceCategoryResponse.ResourceCategories.length > 0) {
-                                setSelectedResourceCategoryId(resourceCategoryResponse.ResourceCategories[0].Id);
+                    const resourceCategoryPromise = fetchResourceCategories({
+                        ServiceId: serviceId,
+                    });
+                    resourceCategoryPromise.then((resourceCategoryResponse) => {
+                        setResourceCategories(resourceCategoryResponse.ResourceCategories);
+                        if (resourceCategoryResponse.ResourceCategories.length > 0) {
+                            setSelectedResourceCategoryId(resourceCategoryResponse.ResourceCategories[0].Id);
 
-                                const timezone = configData?.Enterprises?.find(
-                                    (enterprise) => enterprise.Id === selectedEnterpriseId
-                                )?.IanaTimeZoneIdentifier;
+                            const timezone = configData?.Enterprises?.find(
+                                (enterprise) => enterprise.Id === selectedEnterpriseId
+                            )?.IanaTimeZoneIdentifier;
 
-                                const startMoment = timezone
-                                    ? moment.tz(`${inputData.startUtc}T00:00:00`, timezone).toISOString()
-                                    : inputData.startUtc;
-                                const endMoment = timezone
-                                    ? moment.tz(`${inputData.endUtc}T00:00:00`, timezone).toISOString()
-                                    : inputData.endUtc;
+                            const startMoment = timezone
+                                ? moment.tz(`${inputData.startUtc}T00:00:00`, timezone).toISOString()
+                                : inputData.startUtc;
+                            const endMoment = timezone
+                                ? moment.tz(`${inputData.endUtc}T00:00:00`, timezone).toISOString()
+                                : inputData.endUtc;
 
-                                const ratePayload: RatePayload = {
-                                    EnterpriseId: selectedEnterpriseId,
-                                    ServiceId: serviceId,
-                                    BookingEngineId: bookingEngineId,
-                                    CategoryId: resourceCategoryResponse.ResourceCategories[0].Id,
-                                    AgeCategoryId: configData.AgeCategories[0].Id,
-                                    StartUtc: startMoment,
-                                    EndUtc: endMoment,
-                                };
-                                fetchRateIds(ratePayload)
-                                    .then((rateResponse) => {
-                                        setRates(rateResponse.Rates);
-                                        setSelectedRateId(rateResponse.Rates[0].Id);
+                            const ratePayload: RatePayload = {
+                                EnterpriseId: selectedEnterpriseId,
+                                ServiceId: serviceId,
+                                BookingEngineId: bookingEngineId,
+                                CategoryId: resourceCategoryResponse.ResourceCategories[0].Id,
+                                AgeCategoryId: configData.AgeCategories[0].Id,
+                                StartUtc: startMoment,
+                                EndUtc: endMoment,
+                            };
+                            fetchRateIds(ratePayload)
+                                .then((rateResponse) => {
+                                    setRates(rateResponse.Rates);
+                                    setSelectedRateId(rateResponse.Rates[0].Id);
 
-                                        const availabilityPayload: AvailabilityPayload = {
-                                            EnterpriseId: selectedEnterpriseId,
-                                            ServiceId: serviceId,
-                                            CategoryId: [resourceCategoryResponse.ResourceCategories[0].Id],
-                                            StartUtc: startMoment,
-                                            EndUtc: endMoment,
-                                        };
+                                    const availabilityPayload: AvailabilityPayload = {
+                                        EnterpriseId: selectedEnterpriseId,
+                                        ServiceId: serviceId,
+                                        CategoryId: [resourceCategoryResponse.ResourceCategories[0].Id],
+                                        StartUtc: startMoment,
+                                        EndUtc: endMoment,
+                                    };
 
-                                        fetchAvailabilityApi(availabilityPayload)
-                                            .then(processAvailabilityData)
-                                            .catch((error) => {
-                                                console.error('Error fetching availability', error);
-                                            });
-                                    })
-                                    .catch((error) => {
-                                        console.error('Error fetching rate IDs', error);
-                                    });
-                            }
-                        });
-                    }
-                });
-            } catch (error) {
-                console.error('Error fetching data', error);
-            }
-        },
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        [inputData.endUtc, inputData.startUtc, selectedAgeCategoryId, selectedEnterpriseId, shouldCreateReservation]
-    );
+                                    fetchAvailabilityApi(availabilityPayload)
+                                        .then(processAvailabilityData)
+                                        .catch((error) => {
+                                            console.error('Error fetching availability', error);
+                                        });
+                                })
+                                .catch((error) => {
+                                    console.error('Error fetching rate IDs', error);
+                                });
+                        }
+                    });
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching data', error);
+        }
+    }, [inputData.endUtc, inputData.startUtc, selectedAgeCategoryId, selectedEnterpriseId]);
+    useEffect(() => {
+        if (isPromiseLoading == null) {
+            setIsPromiseLoading(loadData());
+        }
+    }, [isPromiseLoading, loadData]);
+
     useEffect(() => {
         if (
             shouldCreateReservation &&
             selectedAgeCategoryId != null &&
             selectedResourceCategoryId != null &&
+            selectedRateId != null &&
             !isReservationBeingCreated
         ) {
             setIsBeingCreated(true);
@@ -383,6 +388,7 @@ function App() {
         selectedAgeCategoryId,
         selectedResourceCategoryId,
         shouldCreateReservation,
+        selectedRateId,
     ]);
     const handleAgeCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(event.target.value);
@@ -434,26 +440,10 @@ function App() {
     const handleSelectEnterprise = async (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedAgeCategoryId(null);
         setSelectedResourceCategoryId(null);
+        setIsPromiseLoading(null);
         setAvailabilityData([]);
         selectEnterprise(event.target.value);
     };
-
-    // useEffect(() => {
-    //     if (qrCodeRef.current) {
-    //         const observer = new MutationObserver(() => {
-    //             const canvas = qrCodeRef.current?.querySelector('canvas');
-    //             if (canvas) {
-    //                 setQrCodeDataUrl(canvas.toDataURL('image/png'));
-    //             }
-    //         });
-    //
-    //         observer.observe(qrCodeRef.current, {
-    //             childList: true,
-    //         });
-    //
-    //         return () => observer.disconnect();
-    //     }
-    // }, [qrCodeDataUrl]);
 
     const handleResourceCategoryIdChange = (event: ChangeEvent<HTMLSelectElement>) => {
         setSelectedResourceCategoryId(event.target.value);
