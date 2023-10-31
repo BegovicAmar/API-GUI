@@ -11,7 +11,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({ mode, title, setTheme, onToggleSi
     return (
         <div className="app-header-container">
             <button className="sidebar-toggle-button" onClick={onToggleSidebar}>
-                ☰
+                &#9776;
             </button>
             <div className="app-header-content">
                 <span className="app-header-title">{title}</span>

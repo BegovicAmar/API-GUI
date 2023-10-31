@@ -84,9 +84,7 @@ const getReservationData = (reservationsGroupCreateResponse?: ReservationsGroupC
     };
     return JSON.stringify(formattedData);
 };
-// interface WithEnterpriseId {
-//     enterpriseId?: string;
-// }
+
 function App() {
     const [isLoading, setIsLoading] = useState(false);
     const { setTheme, value: mode } = useThemeContext();
@@ -94,7 +92,6 @@ function App() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [sidebarVisible, setSidebarVisible] = useState(false);
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-    // const [qrCodeDataUrl, setQrCodeDataUrl] = useState('');
     const qrCodeRef = useRef<HTMLDivElement>(null);
     const [availabilityData, setAvailabilityData] = useState<Array<{ categoryId: string; lowestAvailability: number }>>(
         []
@@ -278,7 +275,6 @@ function App() {
         try {
             const configDataPromise = fetchEnterpriseConfiguration(selectedEnterpriseId);
             return configDataPromise.then((configData) => {
-                console.count('TOHLE TAKY');
                 if (!isSuccessfulConfigurationResponse(configData)) {
                     setErrorMessage(configData.Message);
                     setIsLoading(false);
@@ -376,9 +372,16 @@ function App() {
                 resourceCategoryId: selectedResourceCategoryId,
                 bookingEngines: configurationData?.BookingEngines,
                 enterprises: configurationData?.Enterprises,
-            }).finally(() => {
-                setIsBeingCreated(false);
-            });
+            })
+                .then(() => {
+                    setIsOverlayOpen(true);
+                })
+                .catch((error) => {
+                    console.error('Reservation failed', error);
+                })
+                .finally(() => {
+                    setIsBeingCreated(false);
+                });
         }
     }, [
         configurationData?.BookingEngines,
@@ -468,7 +471,7 @@ function App() {
                                 'light-error': mode === 'light',
                             })}
                         >
-                            <span className="error-icon">⚠️</span>
+                            <span className="error-icon">&#x26A0;</span>
                             {errorMessage}
                         </div>
                         <Link
@@ -595,7 +598,7 @@ function App() {
                                             'light-error': mode === 'light',
                                         })}
                                     >
-                                        <span className="error-icon">⚠️</span>
+                                        <span className="error-icon">&#x26A0;</span>
                                         {errorMessage}
                                     </div>
                                 )}
@@ -630,7 +633,6 @@ function App() {
                                     </div>
                                     {jsonData && (
                                         <div>
-                                            <button onClick={() => setIsOverlayOpen(true)}>Show Email Preview</button>
                                             {isOverlayOpen && (
                                                 <Portal containerId="portal">
                                                     <EmailPreview
@@ -644,6 +646,9 @@ function App() {
                                             <div ref={qrCodeRef} style={{ display: 'none' }}>
                                                 {jsonData && <QRCode value={jsonData} />}
                                             </div>
+                                            <button className="uniform-width" onClick={() => setIsOverlayOpen(true)}>
+                                                Show Email Preview &#x2709;
+                                            </button>
                                         </div>
                                     )}
                                 </div>
