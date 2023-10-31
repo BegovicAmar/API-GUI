@@ -1586,7 +1586,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, children }
         <div className="overlay">
             <div className="content">
                 <button onClick={onClose} className="close-button">
-                    Close
+                    &#10006;
                 </button>
                 <div dangerouslySetInnerHTML={{ __html: emailHtml }} />
             </div>

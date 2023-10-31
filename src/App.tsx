@@ -633,7 +633,6 @@ function App() {
                                     </div>
                                     {jsonData && (
                                         <div>
-                                            <button onClick={() => setIsOverlayOpen(true)}>Show Email Preview</button>
                                             {isOverlayOpen && (
                                                 <Portal containerId="portal">
                                                     <EmailPreview
@@ -647,6 +646,9 @@ function App() {
                                             <div ref={qrCodeRef} style={{ display: 'none' }}>
                                                 {jsonData && <QRCode value={jsonData} />}
                                             </div>
+                                            <button className="uniform-width" onClick={() => setIsOverlayOpen(true)}>
+                                                Show Email Preview &#x2709;
+                                            </button>
                                         </div>
                                     )}
                                 </div>
