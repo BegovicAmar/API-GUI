@@ -500,20 +500,26 @@ function App() {
                     <div className="App-body">
                         <div className={mode === 'dark' ? 'dark-card' : 'card'}>
                             <div className="center-content">
-                                <DatePicker
-                                    name="Start Date"
-                                    value={inputData.startUtc}
-                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                        handleOnDateChange('startUtc', event)
-                                    }
-                                />
-                                <DatePicker
-                                    name="End Date"
-                                    value={inputData.endUtc}
-                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                        handleOnDateChange('endUtc', event)
-                                    }
-                                />
+                                <div className="date-wrapper">
+                                    <div className="start-date-picker">
+                                        <DatePicker
+                                            name="Start Date"
+                                            value={inputData.startUtc}
+                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleOnDateChange('startUtc', event)
+                                            }
+                                        />
+                                    </div>
+                                    <div className="end-date-picker">
+                                        <DatePicker
+                                            name="End Date"
+                                            value={inputData.endUtc}
+                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleOnDateChange('endUtc', event)
+                                            }
+                                        />
+                                    </div>
+                                </div>
                                 <CustomSelect
                                     name="Select Enterprise"
                                     values={enterprises.map(({ id, name }) => ({
