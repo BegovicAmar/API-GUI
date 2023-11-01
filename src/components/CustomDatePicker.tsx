@@ -21,7 +21,7 @@ export const DatePicker = ({ value, name, onChange }: DatePickerProps) => {
     return (
         <label className={mode === 'dark' ? 'dark-mode-label' : 'light-mode-label'}>
             {name}:
-            <input className="uniform-width" type="date" value={value} onChange={onChange} min={getTodayFormatted()} />
+            <input className="date-picker" type="date" value={value} onChange={onChange} min={getTodayFormatted()} />
         </label>
     );
 };
