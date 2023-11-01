@@ -500,8 +500,28 @@ function App() {
                     <div className="App-body">
                         <div className={mode === 'dark' ? 'dark-card' : 'card'}>
                             <div className="center-content">
+                                <div className="date-wrapper">
+                                    <div className="start-date-picker">
+                                        <DatePicker
+                                            name="Start Date"
+                                            value={inputData.startUtc}
+                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleOnDateChange('startUtc', event)
+                                            }
+                                        />
+                                    </div>
+                                    <div className="end-date-picker">
+                                        <DatePicker
+                                            name="End Date"
+                                            value={inputData.endUtc}
+                                            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                                                handleOnDateChange('endUtc', event)
+                                            }
+                                        />
+                                    </div>
+                                </div>
                                 <CustomSelect
-                                    name="Choose Enterprise"
+                                    name="Select Enterprise"
                                     values={enterprises.map(({ id, name }) => ({
                                         value: id,
                                         name: { [DEFAULT_LANGUAGE_CODE]: name },
@@ -530,15 +550,6 @@ function App() {
                                     onChange={handleResourceCategoryIdChange}
                                 />
                                 <CustomSelect
-                                    name="Age Category"
-                                    values={ageCategories.map(({ Id, Name }) => ({
-                                        value: Id,
-                                        name: Name,
-                                    }))}
-                                    selectedValue={selectedAgeCategoryId}
-                                    onChange={handleAgeCategoryIdChange}
-                                />
-                                <CustomSelect
                                     name="Rate"
                                     values={rates.map(({ Id, Name }) => ({
                                         value: Id,
@@ -549,7 +560,7 @@ function App() {
                                 />
                                 <div className="fields-wrapper">
                                     <button className="uniform-width" onClick={handleLastNameClick}>
-                                        Randomize Guest
+                                        Randomize Guest Data
                                     </button>
                                 </div>
                                 <CustomInput
@@ -562,19 +573,14 @@ function App() {
                                     value={inputData.email}
                                     onChange={(event) => handleOnDateChange('email', event)}
                                 />
-                                <DatePicker
-                                    name="StartUtc"
-                                    value={inputData.startUtc}
-                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                        handleOnDateChange('startUtc', event)
-                                    }
-                                />
-                                <DatePicker
-                                    name="EndUtc"
-                                    value={inputData.endUtc}
-                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                                        handleOnDateChange('endUtc', event)
-                                    }
+                                <CustomSelect
+                                    name="Age Category"
+                                    values={ageCategories.map(({ Id, Name }) => ({
+                                        value: Id,
+                                        name: Name,
+                                    }))}
+                                    selectedValue={selectedAgeCategoryId}
+                                    onChange={handleAgeCategoryIdChange}
                                 />
                                 <div className="fields-wrapper">
                                     <button
@@ -636,6 +642,7 @@ function App() {
                                             {isOverlayOpen && (
                                                 <Portal containerId="portal">
                                                     <EmailPreview
+                                                        reservationDetails={reservationDetails}
                                                         onClose={() => setIsOverlayOpen(false)}
                                                         isOpen={isOverlayOpen}
                                                     >

@@ -3,15 +3,30 @@
 /* eslint-disable react/no-danger */
 import React from 'react';
 import ReactDOMServer from 'react-dom/server';
+import { ReservationsGroupCreateResponse } from '../api';
 
 interface EmailPreviewProps {
     isOpen: boolean;
     onClose: () => void;
     children: React.ReactNode;
+    reservationDetails: ReservationsGroupCreateResponse;
 }
 
-const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, children }) => {
+const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, children, reservationDetails }) => {
     if (!isOpen) return null;
+
+    const { LastName, StartUtc, EndUtc, Number } = reservationDetails.Reservations[0];
+
+    function formatUTCDate(utcDateString: string | number | Date) {
+        const date = new Date(utcDateString);
+        const dd = String(date.getUTCDate()).padStart(2, '0');
+        const mm = String(date.getUTCMonth() + 1).padStart(2, '0'); // January is 0!
+        const yyyy = date.getUTCFullYear();
+        return `${dd}-${mm}-${yyyy}`;
+    }
+
+    const formattedStartUtc = formatUTCDate(StartUtc);
+    const formattedEndUtc = formatUTCDate(EndUtc);
 
     const emailHtml = `
     <head>
@@ -149,7 +164,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, children }
    </head>
    <body style="margin: 0; padding: 0; background-color: #E5E5E5; font-family: &#39;Montserrat&#39;, &#39;Helvetica Neue&#39;, SagoeUI, sans-serif; color: #101B2C; height: 100%; width: 100%;">
     <script type="application/ld+json">
-     [{"@context":"http://schema.org","@type":"LodgingReservation","reservationNumber":"249","reservationStatus":"http://schema.org/Confirmed","checkinDate":"2023-10-31T15:00:00Z","checkoutDate":"2023-11-02T12:00:00Z","modifiedTime":"2023-10-31T15:46:38Z","underName":{"@type":"Person","name":"Weber"},"reservationFor":{"@type":"LodgingBusiness","name":"Mews Hotel","telephone":"(555) 555-1234","address":{"@type":"PostalAddress","streetAddress":"Main Street 4860 test","addressLocality":"Berlin","addressRegion":"DE-BE","postalCode":"10557","addressCountry":"DE"}},"modifyReservationUrl":"https://app.mews-develop.com/User/SignIn/B73664CA4D5D46D28081B0AC010400B9-109631A64CB6D268C8B828E5B156564?utm_campaign=checkinCTA&utm_medium=email&utm_source=confirmation&language=en-US&enterpriseId=8d99755d-d50d-4c14-96fe-b06600962f8f"}]
+     [{"@context":"http://schema.org","@type":"LodgingReservation","reservationNumber":"249","reservationStatus":"http://schema.org/Confirmed","checkinDate":"2023-10-31T15:00:00Z","checkoutDate":"2023-11-02T12:00:00Z","modifiedTime":"2023-10-31T15:46:38Z","underName":{"@type":"Person","name":"${LastName}"},"reservationFor":{"@type":"LodgingBusiness","name":"Mews Hotel","telephone":"(555) 555-1234","address":{"@type":"PostalAddress","streetAddress":"Main Street 4860 test","addressLocality":"Berlin","addressRegion":"DE-BE","postalCode":"10557","addressCountry":"DE"}},"modifyReservationUrl":"https://app.mews-develop.com/User/SignIn/B73664CA4D5D46D28081B0AC010400B9-109631A64CB6D268C8B828E5B156564?utm_campaign=checkinCTA&utm_medium=email&utm_source=confirmation&language=en-US&enterpriseId=8d99755d-d50d-4c14-96fe-b06600962f8f"}]
     </script>
     <center>
      <table id="bodyTable" style="margin: 0; padding: 0; background-color: #E5E5E5; height: 100%; width: 100%;" width="100%" height="100%" role="presentation" border="0" cellpadding="0" cellspacing="0">
@@ -816,7 +831,7 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, children }
                                  <tr>
                                   <td>
                                    <strong class="low" style="font-size: 16px; line-height: 24px; font-weight: 500;">
-                                    Oct 31 2023 - Nov 2 2023
+                                    ${formattedStartUtc} - ${formattedEndUtc}
                                    </strong>
                                   </td>
                                  </tr>
@@ -926,14 +941,14 @@ const EmailPreview: React.FC<EmailPreviewProps> = ({ isOpen, onClose, children }
                                      <tr style="width: 100%; border-collapse: collapse; border-spacing: 0;">
                                       <td style="width: 100%; margin: 0; padding: 0; border-collapse: collapse; border-spacing: 0;" width="100%">
                                        <span class="label secondary" style="font-size: 14px; line-height: 21px; font-weight: 400; color: #5F646D;">
-                                        Confirmation number: 249
+                                        Confirmation number: ${Number}
                                        </span>
                                       </td>
                                      </tr>
                                      <tr style="width: 100%; border-collapse: collapse; border-spacing: 0;">
                                       <td style="width: 100%; margin: 0; padding: 0; border-collapse: collapse; border-spacing: 0;" width="100%">
                                        <span class="label secondary" style="font-size: 14px; line-height: 21px; font-weight: 400; color: #5F646D;">
-                                        Weber
+                                        ${LastName}
                                        </span>
                                       </td>
                                      </tr>
