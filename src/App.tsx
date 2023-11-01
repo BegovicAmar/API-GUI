@@ -563,14 +563,14 @@ function App() {
                                     onChange={(event) => handleOnDateChange('email', event)}
                                 />
                                 <DatePicker
-                                    name="StartUtc"
+                                    name="Start Date"
                                     value={inputData.startUtc}
                                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                                         handleOnDateChange('startUtc', event)
                                     }
                                 />
                                 <DatePicker
-                                    name="EndUtc"
+                                    name="End Date"
                                     value={inputData.endUtc}
                                     onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
                                         handleOnDateChange('endUtc', event)
@@ -636,6 +636,7 @@ function App() {
                                             {isOverlayOpen && (
                                                 <Portal containerId="portal">
                                                     <EmailPreview
+                                                        reservationDetails={reservationDetails}
                                                         onClose={() => setIsOverlayOpen(false)}
                                                         isOpen={isOverlayOpen}
                                                     >
