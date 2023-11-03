@@ -111,7 +111,7 @@ function App() {
     const [rates, setRates] = useState<Rate[]>([]);
     const [enterprises, setEnterprises] = useState<PoorEnterprise[]>([
         { id: '8a51f050-8467-4e92-84d5-abc800c810b8', name: 'Bespin' },
-        { id: 'bd1dbc44-3de7-4931-b73f-aff800cce435', name: 'Nastya Tokyo Resort' },
+        { id: '6cf58a8c-299b-4e31-8408-ace800ef03b0', name: 'Nastya Currencies Hotel' },
         { id: '3dca7958-eb0b-4f25-b3d2-ac7700c9fb78', name: 'Jakub Test Hotel' },
     ]);
     const addEnterprise = (enterprise: PoorEnterprise) => {
