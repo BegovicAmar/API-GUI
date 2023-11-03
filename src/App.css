@@ -57,8 +57,8 @@
 
 .center-content {
     padding: 50px;
-    padding-top: 40px;
-    padding-bottom: 40px;
+    padding-top: 20px;
+    padding-bottom: 20px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -201,7 +201,7 @@
 }
 
 .dark-sidebar {
-    background-color: #1d1d1fdb;;
+    background-color: #222223;;
     color: white; 
 }
 

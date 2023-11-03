@@ -34,7 +34,10 @@ export const CustomSelect = ({ selectedValue, name, onChange, values }: CustomIn
                     <option
                         key={value}
                         value={value}
-                        style={{ color: availability === '0' ? 'red' : mode === 'dark' ? '#fff' : '#333' }}
+                        style={{
+                            color:
+                                availability === '0' ? 'red' : mode === 'dark' ? 'dark-mode-label' : 'light-mode-label',
+                        }}
                         disabled={availability === '0'}
                     >
                         {getDefaultLanguageTextOrFallback(name)}
