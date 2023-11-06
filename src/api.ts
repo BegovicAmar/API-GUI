@@ -37,8 +37,15 @@ const authProps: AuthOptions = {
     CurrencyCode: 'EUR',
 };
 
-const ENV_URL = 'https://gx.mews-develop.com';
+const environment = () => {
+    const { host } = window.location;
+    if (host.includes('demo')) {
+        return 'demo';
+    }
+    return 'develop';
+};
 
+const ENV_URL = `https://gx.mews-${environment()}.com`;
 const authCall = async <T>(endpoint: string, payload: T) => {
     const responseMeta = await fetch(endpoint, {
         method: 'POST',
