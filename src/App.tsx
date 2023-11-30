@@ -640,7 +640,6 @@ function App() {
                                                 <Portal containerId="portal">
                                                     <EmailPreview
                                                         reservationDetails={reservationDetails}
-                                                        onClose={() => setIsOverlayOpen(false)}
                                                         isOpen={isOverlayOpen}
                                                     >
                                                         <QRCodeSVG value={jsonData} size={300} />
